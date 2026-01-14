@@ -2,539 +2,633 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Notcoin Pro Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --notcoin-gold: #ffd700;
-            --notcoin-dark-gold: #b8860b;
-            --diamond-blue: #00bfff;
-            --bronze-brown: #cd7f32;
-            --background-dark: #000000;
-            --surface-dark: #1a1a1a;
-            --text-light: #ffffff;
+            --gold: #ffd700;
+            --blue: #00bfff;
+            --bronze: #cd7f32;
+            --bg: #000000;
+            --surface: #1c1c1e;
+            --surface-light: #2c2c2e;
+            --text: #ffffff;
+            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        /* --- منع التحديد والنسخ --- */
         * {
-            -webkit-user-select: none; /* Safari */
-            -ms-user-select: none; /* IE 10 and IE 11 */
-            user-select: none; /* Standard syntax */
-            -webkit-touch-callout: none; /* iOS Safari */
-        }
-        
-        /* منع سحب الصور */
-        img {
-            -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
-            pointer-events: none; /* يمنع التفاعل المباشر مع الصورة للحماية */
+            -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+            box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--background-dark);
-            color: var(--text-light);
-            font-family: 'Cairo', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            touch-action: manipulation;
-            transition: background 1s ease-in-out;
-            height: 100vh;
+            background-color: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif;
+            margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+            transition: background 0.5s;
         }
 
-        /* --- خلفيات الدوريات --- */
-        body.league-bronze { background: radial-gradient(circle at center, #2c1810 0%, #000000 100%); }
-        body.league-gold { background: radial-gradient(circle at center, #3a2a03 0%, #000000 100%); }
-        body.league-diamond { background: radial-gradient(circle at center, #0f0c29 0%, #000000 100%); }
-        body.turbo-active { background: radial-gradient(circle at center, #551a00 0%, #000000 100%) !important; }
+        /* --- الخلفيات المتدرجة --- */
+        body.rank-bronze { background: radial-gradient(circle at center, #2c1810 0%, #000 100%); }
+        body.rank-silver { background: radial-gradient(circle at center, #3a3a3a 0%, #000 100%); }
+        body.rank-gold { background: radial-gradient(circle at center, #3a2a03 0%, #000 100%); }
+        body.rank-diamond { background: radial-gradient(circle at center, #0f0c29 0%, #000 100%); }
+        body.turbo-active { background: radial-gradient(circle at center, #551a00 0%, #000 100%) !important; }
 
-        .header {
-            position: absolute; top: 20px; width: 100%; text-align: center; z-index: 10; pointer-events: none;
+        /* --- المكونات العامة --- */
+        .btn-primary {
+            background: var(--gold); color: #000; border: none; padding: 12px 20px;
+            border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer;
+            transition: transform 0.1s; font-size: 16px;
         }
-        .user-info {
-            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 5px;
-            background: rgba(255, 255, 255, 0.1); width: fit-content; margin: 0 auto 10px auto;
-            padding: 5px 15px; border-radius: 20px; backdrop-filter: blur(5px);
-        }
-        .user-name { font-size: 14px; font-weight: bold; color: #eee; }
+        .btn-primary:active { transform: scale(0.95); }
+        .btn-primary:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-        .score-display {
-            font-size: 56px; font-weight: 900; text-shadow: 0 0 20px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .league-rank {
-            font-size: 16px; color: rgba(255,255,255,0.7); letter-spacing: 2px;
-            text-transform: uppercase; font-weight: 900;
-        }
-
-        /* --- الصاروخ --- */
-        @keyframes floatFade {
-            0% { opacity: 0; transform: scale(0) translateY(20px); }
-            10% { opacity: 1; transform: scale(1.2) translateY(0); }
-            50% { transform: scale(1) translateY(-15px); }
-            90% { opacity: 1; transform: scale(1.1) translateY(0); }
-            100% { opacity: 0; transform: scale(0) translateY(-20px); }
-        }
-        .turbo-rocket {
-            position: absolute; font-size: 60px; cursor: pointer; z-index: 100;
-            animation: floatFade 5s ease-in-out forwards; filter: drop-shadow(0 0 20px orange);
-            pointer-events: auto;
-        }
-
-        /* --- وضع التيربو للصورة الجديدة --- */
-        .not-coin.turbo-mode {
-            box-shadow: 0 0 80px orangered, inset 0 0 40px orange !important;
-            border: 5px solid #ff4500;
-            animation: shake 0.5s infinite;
-        }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-
+        /* --- منطقة اللعب --- */
         .game-stage {
-            height: 100vh; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; perspective: 1000px; position: relative; z-index: 5;
-        }
-        
-        .coin-wrapper {
-            position: relative; width: 320px; height: 320px; border-radius: 50%;
-            cursor: pointer; transition: transform 0.1s ease-out; transform-style: preserve-3d;
-            -webkit-tap-highlight-color: transparent; z-index: 5; pointer-events: auto;
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: space-evenly; padding-top: var(--safe-top);
+            padding-bottom: calc(90px + var(--safe-bottom)); width: 100%;
         }
 
-        .not-coin {
-            width: 100%; height: 100%; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.5s; position: relative; overflow: hidden; /* لقص الصورة الزائدة */
-            background: rgba(0,0,0,0.2); /* خلفية خفيفة في حال تأخر الصورة */
+        .score-container { text-align: center; z-index: 10; }
+        .league-badge {
+            background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px;
+            font-size: 14px; color: #ccc; margin-bottom: 5px; display: inline-block;
+            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1);
         }
-        
-        /* تنسيق الصورة الجديدة */
-        .not-coin img.main-coin-img {
-            width: 100%; height: 100%; 
-            object-fit: cover; /* ملء الدائرة بالكامل */
-            pointer-events: none;
-            z-index: 2;
+        .score-val { font-size: clamp(45px, 12vw, 70px); font-weight: 900; line-height: 1; }
+
+        .coin-btn {
+            width: min(45vh, 85vw); height: min(45vh, 85vw);
+            max-width: 360px; max-height: 360px;
+            border-radius: 50%; cursor: pointer; position: relative; z-index: 5;
+            transform-style: preserve-3d; transition: transform 0.1s;
         }
-
-        /* الظلال حول العملة حسب الدوري */
-        .league-bronze .not-coin { box-shadow: 0 10px 40px rgba(205, 127, 50, 0.4); border: 2px solid #cd7f32; }
-        .league-gold .not-coin { box-shadow: 0 10px 50px rgba(255, 215, 0, 0.5); border: 2px solid #ffd700; }
-        .league-diamond .not-coin { box-shadow: 0 10px 60px rgba(0, 191, 255, 0.6); border: 2px solid #00bfff; }
-
-        .particle {
-            position: absolute; pointer-events: none; animation: flyUp 0.8s ease-out forwards;
-            font-weight: 900; font-size: 32px; color: white; z-index: 100; text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        .coin-inner {
+            width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+            border: 4px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.3);
         }
-        @keyframes flyUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-120px) scale(1.5); opacity: 0; }
-        }
+        .coin-inner img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .coin-inner.turbo { border-color: #ff4500; box-shadow: 0 0 80px #ff4500; animation: shake 0.5s infinite; }
 
-        .energy-hud { position: absolute; bottom: 110px; width: 85%; left: 7.5%; }
-        .energy-info { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 16px; color: #ddd; }
-        .progress-track { background: rgba(255,255,255,0.1); height: 14px; border-radius: 7px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #ff8c00); width: 100%; transition: width 0.2s linear; }
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); } }
 
+        .energy-hud { width: 85%; max-width: 400px; }
+        .energy-bar { background: #333; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 5px; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, var(--gold), orange); width: 100%; transition: width 0.2s; }
+
+        /* --- التنقل السفلي --- */
         .nav-bar {
-            position: fixed; bottom: 20px; width: 90%; left: 5%;
-            background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(15px);
-            display: flex; justify-content: space-around; padding: 12px 0;
-            border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); z-index: 20;
+            position: fixed; bottom: calc(10px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 500px; background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(20px); border-radius: 25px; display: flex;
+            justify-content: space-between; padding: 10px 20px; z-index: 100;
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
-        .nav-btn {
-            background: none; border: none; color: #888; font-size: 12px;
+        .nav-item {
             display: flex; flex-direction: column; align-items: center; gap: 4px;
-            font-weight: 700; transition: color 0.2s;
+            background: none; border: none; color: #666; font-size: 11px; font-weight: 700;
+            transition: 0.3s; width: 60px;
         }
-        .nav-btn.active { color: white; transform: scale(1.1); }
-        .nav-icon { font-size: 22px; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-item.active { color: var(--gold); transform: translateY(-2px); }
 
-        .section-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            background: var(--background-dark); z-index: 15; overflow-y: auto;
-            padding-top: 80px; padding-bottom: 100px; flex-direction: column; align-items: center;
+        /* --- القوائم (Modals) --- */
+        .section {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+            background: var(--bg); z-index: 50; overflow-y: auto;
+            padding: calc(20px + var(--safe-top)) 20px calc(100px + var(--safe-bottom));
         }
-        .shop-item {
-            background: var(--surface-dark); width: 90%; margin: 10px auto; padding: 15px;
-            border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333;
-        }
-        .btn-buy {
-            background: var(--notcoin-gold); border: none; padding: 10px 20px;
-            border-radius: 10px; font-weight: bold; color: #000;
-        }
-        .btn-buy:disabled { background: #333; color: #666; }
+        .section-title { font-size: 24px; font-weight: 900; text-align: center; margin-bottom: 20px; color: var(--text); }
         
-        #offline-popup {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(30,30,30, 0.95); backdrop-filter: blur(10px);
-            padding: 30px; border-radius: 20px; border: 2px solid var(--notcoin-gold);
-            text-align: center; z-index: 1000; display: none; width: 70%; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        .card {
+            background: var(--surface); border-radius: 16px; padding: 15px;
+            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* --- ستايل البروفايل --- */
+        .profile-header { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .avatar {
+            width: 80px; height: 80px; border-radius: 50%; background: #333;
+            border: 3px solid var(--gold); overflow: hidden; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; color: #fff; font-weight: bold;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-details { text-align: center; }
+        .user-tag { color: #888; font-size: 14px; margin-top: 4px; }
+        
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #333; font-size: 14px; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #aaa; }
+        .info-val { color: #fff; font-weight: bold; font-family: monospace; }
+        
+        .wallet-btn {
+            background: #007aff; color: white; border: none; padding: 12px; width: 100%;
+            border-radius: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 10px;
+        }
+
+        /* --- ستايل المهام (Earn) --- */
+        .daily-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+        .daily-item {
+            background: var(--surface-light); border-radius: 10px; padding: 10px 5px;
+            text-align: center; opacity: 0.5; border: 1px solid transparent;
+        }
+        .daily-item.active { opacity: 1; border-color: var(--gold); background: rgba(255, 215, 0, 0.1); }
+        .daily-item.claimed { opacity: 0.5; background: #222; color: #444; text-decoration: line-through; }
+        .daily-day { font-size: 10px; color: #aaa; margin-bottom: 5px; }
+        .daily-val { font-size: 12px; font-weight: bold; color: var(--gold); }
+
+        .task-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--surface); padding: 12px; border-radius: 12px; margin-bottom: 10px;
+        }
+        .task-icon { font-size: 24px; margin-left: 10px; }
+        .task-info { flex: 1; }
+        .task-title { font-size: 14px; font-weight: bold; }
+        .task-reward { font-size: 12px; color: var(--gold); }
+
+        /* --- ستايل الليدربورد --- */
+        .leaderboard-row {
+            display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333;
+        }
+        .rank-num { width: 30px; font-weight: bold; color: #888; }
+        .rank-1 { color: var(--gold); }
+        .rank-2 { color: silver; }
+        .rank-3 { color: #cd7f32; }
+        .lb-user { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .lb-avatar { width: 30px; height: 30px; border-radius: 50%; background: #444; color: #fff; text-align: center; line-height: 30px; font-size: 12px;}
+        .lb-score { font-weight: bold; color: var(--gold); font-size: 14px; }
+
+        /* --- الجزيئات والرسوم المتحركة --- */
+        .particle {
+            position: absolute; pointer-events: none; animation: pop 0.8s ease-out forwards;
+            font-weight: 900; font-size: 28px; color: white; z-index: 100;
+        }
+        @keyframes pop {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0.5); opacity: 0; }
+        }
+
+        .turbo-rocket {
+            position: absolute; font-size: 50px; cursor: pointer; z-index: 99;
+            animation: float 4s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="league-bronze">
-    <div class="header">
-        <div class="user-info" id="user-info" style="display:none;">
-            <span class="user-name" id="user-name">Player</span>
-        </div>
-
-        <div class="league-rank" id="league-name">Bronze League</div>
-        <div class="score-display">
-            <img src="https://img.icons8.com/emoji/48/coin-emoji.png" style="width:45px;" draggable="false">
-            <span id="score">0</span>
-        </div>
-    </div>
+<body class="rank-bronze">
 
     <div id="mine-section" class="game-stage">
-        <div class="coin-wrapper" id="coin-btn">
-            <div class="not-coin" id="coin-visual">
-                <img src="https://raw.githubusercontent.com/halthalk/car/cfdeeba8911952a1ec29378f39476f1cec9c649e/20260114_190253.png" class="main-coin-img" alt="Coin">
+        <div class="score-container">
+            <div class="league-badge" id="league-display">Bronze I</div>
+            <div class="score-val"><span id="score">0</span></div>
+        </div>
+
+        <div class="coin-btn" id="coin-btn">
+            <div class="coin-inner" id="coin-visual">
+                <img src="https://raw.githubusercontent.com/halthalk/car/cfdeeba8911952a1ec29378f39476f1cec9c649e/20260114_190253.png" draggable="false">
             </div>
         </div>
 
         <div class="energy-hud">
-            <div class="energy-info">
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:bold; color:#ccc;">
                 <span>⚡ Energy</span>
                 <span><span id="curr-energy">1000</span> / <span id="max-energy">1000</span></span>
             </div>
-            <div class="progress-track">
-                <div class="progress-fill" id="energy-bar"></div>
-            </div>
+            <div class="energy-bar"><div class="energy-fill" id="energy-fill"></div></div>
         </div>
     </div>
 
-    <div id="boosts-section" class="section-modal">
-        <h2 style="color:white; text-align:center; margin-bottom: 20px;">🚀 Power Upgrades</h2>
+    <div id="profile-section" class="section">
+        <h2 class="section-title">My Profile</h2>
         
-        <div class="shop-item">
-            <div>
-                <div style="font-size:18px;">Multitap 👆</div>
-                <div style="color:#aaa; font-size:13px;">+1 coin per tap</div>
-                <div style="color:var(--notcoin-gold); font-size:12px;">Lvl: <span id="lvl-multitap">1</span></div>
+        <div class="card profile-header">
+            <div class="avatar" id="profile-avatar">U</div>
+            <div class="user-details">
+                <h3 style="margin:0;" id="profile-name">Loading...</h3>
+                <div class="user-tag" id="profile-username">@username</div>
             </div>
-            <button class="btn-buy" id="btn-multitap" onclick="buyUpgrade('multitap')"><span id="cost-multitap">500</span> 💰</button>
+            <button class="wallet-btn" onclick="connectWallet()">
+                <span>💼</span> Connect Wallet
+            </button>
         </div>
 
-        <div class="shop-item">
-            <div>
-                <div style="font-size:18px;">Energy Limit 🔋</div>
-                <div style="color:#aaa; font-size:13px;">+500 Max Energy</div>
-                <div style="color:var(--notcoin-gold); font-size:12px;">Lvl: <span id="lvl-energy">1</span></div>
+        <h3 style="margin-bottom:10px;">Telegram Info</h3>
+        <div class="card">
+            <div class="info-row">
+                <span class="info-label">User ID</span>
+                <span class="info-val" id="profile-id">---</span>
             </div>
-            <button class="btn-buy" id="btn-energy" onclick="buyUpgrade('energy')"><span id="cost-energy">1000</span> 💰</button>
+            <div class="info-row">
+                <span class="info-label">Language</span>
+                <span class="info-val" id="profile-lang">---</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Premium</span>
+                <span class="info-val" id="profile-premium" style="color:#ff4500;">No</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Total Taps</span>
+                <span class="info-val" id="profile-taps">0</span>
+            </div>
         </div>
 
-        <div class="shop-item">
-            <div>
-                <div style="font-size:18px;">Recharge Speed ⚡</div>
-                <div style="color:#aaa; font-size:13px;">Faster recovery</div>
-                <div style="color:var(--notcoin-gold); font-size:12px;">Lvl: <span id="lvl-speed">1</span></div>
+        <h3 style="margin-bottom:10px;">🏆 Leaderboard</h3>
+        <div class="card" id="leaderboard-list">
             </div>
-            <button class="btn-buy" id="btn-speed" onclick="buyUpgrade('speed')"><span id="cost-speed">2000</span> 💰</button>
-        </div>
-
-        <div class="shop-item" style="border: 1px solid var(--notcoin-gold);">
-            <div>
-                <div style="font-size:18px; color:var(--notcoin-gold)">🤖 Auto-Bot</div>
-                <div style="color:#aaa; font-size:13px;">Mines while you sleep</div>
-                <div style="color:#888; font-size:12px;">Status: <span id="bot-status">OFF</span></div>
-            </div>
-            <button class="btn-buy" id="btn-bot" onclick="buyUpgrade('bot')"><span id="cost-bot">50000</span> 💰</button>
-        </div>
     </div>
 
-    <div id="earn-section" class="section-modal">
-        <h2 style="color:white; text-align:center;">💰 Earn Tasks</h2>
-        <div style="text-align:center; color:#888; margin-top:50px;">Coming Soon...</div>
+    <div id="earn-section" class="section">
+        <h2 class="section-title">Earn Coins</h2>
+        
+        <div class="card">
+            <h3 style="margin-top:0;">📅 Daily Rewards</h3>
+            <div class="daily-grid" id="daily-grid">
+                </div>
+            <button class="btn-primary" id="btn-claim-daily" onclick="claimDaily()" disabled>Check Next Reward</button>
+        </div>
+
+        <h3 style="margin-bottom:10px;">🚀 Tasks List</h3>
+        <div id="tasks-list">
+            </div>
+    </div>
+
+    <div id="boosts-section" class="section">
+        <h2 class="section-title">Boosters</h2>
+        <div id="boosts-list">
+            </div>
     </div>
 
     <div class="nav-bar">
-        <button class="nav-btn active" onclick="switchTab('mine', this)"><span class="nav-icon">⛏️</span> Mine</button>
-        <button class="nav-btn" onclick="switchTab('boosts', this)"><span class="nav-icon">🚀</span> Boosts</button>
-        <button class="nav-btn" onclick="switchTab('earn', this)"><span class="nav-icon">💰</span> Earn</button>
-    </div>
-
-    <div id="offline-popup">
-        <h2 style="color:var(--notcoin-gold); margin:0;">Welcome Back!</h2>
-        <p style="color:#ccc; font-size:14px;">Your mining bot worked hard:</p>
-        <h1 id="offline-earnings" style="font-size:40px; margin: 10px 0;">+0</h1>
-        <button class="btn-buy" onclick="document.getElementById('offline-popup').style.display='none'" style="width:100%; padding: 15px;">Claim Coins</button>
+        <button class="nav-item active" onclick="nav('mine', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z"/></svg>
+            Mine
+        </button>
+        <button class="nav-item" onclick="nav('earn', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            Earn
+        </button>
+        <button class="nav-item" onclick="nav('boosts', this)">
+            <svg viewBox="0 0 24 24"><path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.5 2.54l2.53 1.27c.63-1.21 1-2.6 1-4.06 0-5.36-4.34-9.7-9-9.7zM12 18c-3.31 0-6-2.69-6-6 0-1.65.67-3.15 1.76-4.24L6.34 6.34C4.9 7.79 4 9.79 4 12c0 4.42 3.58 8 8 8 2.21 0 4.21-.9 5.66-2.34l-1.42-1.42C15.15 17.33 13.65 18 12 18zm.3-15.05h-1.7v3.08c-2.84.48-5.2 2.65-5.96 5.47h3.04c.55-1.2 1.63-2.07 2.92-2.07v-6.48z"/></svg>
+            Boosts
+        </button>
+        <button class="nav-item" onclick="nav('profile', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            Profile
+        </button>
     </div>
 
 <script>
-    /* --- SECURITY SCRIPT: Anti-Copy & Anti-Shortcut --- */
-    (function() {
-        // منع القائمة المنسدلة (Right Click)
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-
-        // منع اختصارات لوحة المفاتيح
-        document.onkeydown = function(e) {
-            // F12
-            if(e.keyCode == 123) {
-                return false;
-            }
-            // Ctrl+I (Inspector)
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            // Ctrl+J (Console)
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            // Ctrl+C (Console) - لمنع النسخ
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) {
-                return false;
-            }
-            // Ctrl+U (View Source)
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-            // Ctrl+S (Save Page)
-            if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) {
-                return false;
-            }
-        };
-
-        // تعطيل السحب والإفلات للصور
-        document.addEventListener('dragstart', function(e) {
-             e.preventDefault();
-        });
-    })();
-    /* --- END SECURITY SCRIPT --- */
-
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
+    tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000');
 
+    // --- بيانات اللعبة ---
     let gameData = {
         score: 0, energy: 1000, maxEnergy: 1000, tapValue: 1, regenRate: 1,
-        levels: { multitap: 1, energy: 1, speed: 1, bot: 0 },
-        lastSaveTime: Date.now()
+        lastSave: Date.now(), totalTaps: 0,
+        upgrades: { multitap: 1, energy: 1, speed: 1, bot: 0 },
+        daily: { streak: 0, lastClaim: 0 },
+        tasks: [] // IDs of claimed tasks
     };
-    
+
+    const BOOSTS = {
+        multitap: { name: "Multitap", base: 500, desc: "+1 per tap" },
+        energy: { name: "Energy Limit", base: 1000, desc: "+500 max energy" },
+        speed: { name: "Recharging", base: 2000, desc: "Faster energy" },
+        bot: { name: "Tap Bot", base: 50000, desc: "Auto mine offline" }
+    };
+
+    const TASKS_DB = [
+        { id: 'tg_chan', title: 'Join our Channel', reward: 5000, url: 'https://telegram.org' },
+        { id: 'twitter', title: 'Follow on X', reward: 5000, url: 'https://twitter.com' },
+        { id: 'invite', title: 'Invite 3 Friends', reward: 25000, url: '#' }
+    ];
+
     let turboActive = false;
-    const BASE_COSTS = { multitap: 500, energy: 1000, speed: 2000, bot: 50000 };
-    const els = {
-        score: document.getElementById('score'),
-        energy: document.getElementById('curr-energy'),
-        maxEnergy: document.getElementById('max-energy'),
-        bar: document.getElementById('energy-bar'),
-        coinBtn: document.getElementById('coin-btn'),
-        coinVisual: document.getElementById('coin-visual'),
-        leagueName: document.getElementById('league-name')
-    };
 
+    // --- التهيئة ---
     function init() {
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-info').style.display = 'flex';
-            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
-        }
-
-        const saved = localStorage.getItem('notcoin_pro_v3_secure');
+        const saved = localStorage.getItem('notcoin_v5_pro');
         if (saved) {
-            const parsed = JSON.parse(saved);
+            let parsed = JSON.parse(saved);
             Object.assign(gameData, parsed);
-            const secondsGone = (Date.now() - gameData.lastSaveTime) / 1000;
-            gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (secondsGone * gameData.regenRate));
-            if (gameData.levels.bot > 0) {
-                const botEarnings = Math.floor(secondsGone * gameData.levels.bot);
-                if (botEarnings > 0) {
-                    gameData.score += botEarnings;
-                    document.getElementById('offline-earnings').innerText = `+${botEarnings.toLocaleString()}`;
-                    document.getElementById('offline-popup').style.display = 'block';
+            // حساب الاوفلاين
+            let seconds = (Date.now() - gameData.lastSave) / 1000;
+            gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (seconds * gameData.regenRate));
+            if(gameData.upgrades.bot > 0 && seconds > 60) {
+                let earned = Math.floor(seconds * gameData.upgrades.bot);
+                if(earned > 0) {
+                    gameData.score += earned;
+                    tg.showAlert(`🤖 Bot mined ${earned.toLocaleString()} coins while you were away!`);
                 }
             }
         }
+        
+        setupProfile();
+        renderBoosts();
+        renderDaily();
+        renderTasks();
+        renderLeaderboard();
         updateUI();
-        scheduleRocket(); 
+        setInterval(saveGame, 2000);
+        setInterval(regenEnergy, 1000);
+        scheduleRocket();
     }
 
-    function saveGame() {
-        gameData.lastSaveTime = Date.now();
-        localStorage.setItem('notcoin_pro_v3_secure', JSON.stringify(gameData));
-    }
-    setInterval(saveGame, 2000);
-
-    function handleTap(e) {
-        if (e.type === 'touchstart') e.preventDefault(); 
-        const points = e.changedTouches ? e.changedTouches : [e];
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-        let pointsAdded = false;
-        for (let i = 0; i < points.length; i++) {
-            if (turboActive || gameData.energy >= gameData.tapValue) {
-                let value = gameData.tapValue;
-                if (turboActive) value = value * 5;
-                gameData.score += value;
-                if (!turboActive) gameData.energy -= gameData.tapValue;
-                spawnParticle(points[i].clientX, points[i].clientY, `+${value}`);
-                pointsAdded = true;
-            }
+    // --- إعداد البروفايل ---
+    function setupProfile() {
+        const user = tg.initDataUnsafe.user || { first_name: "Guest", username: "guest", id: "000000", language_code: "en" };
+        
+        document.getElementById('profile-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        document.getElementById('profile-username').innerText = user.username ? '@' + user.username : 'No Username';
+        document.getElementById('profile-id').innerText = user.id;
+        document.getElementById('profile-lang').innerText = (user.language_code || 'en').toUpperCase();
+        
+        if(user.is_premium) {
+            const premEl = document.getElementById('profile-premium');
+            premEl.innerText = "YES 🌟"; premEl.style.color = "gold";
         }
-        if (pointsAdded) {
-            tiltCoin(points[0].clientX, points[0].clientY);
+
+        if(user.photo_url) {
+            document.getElementById('profile-avatar').innerHTML = `<img src="${user.photo_url}">`;
+        } else {
+            document.getElementById('profile-avatar').innerText = user.first_name.charAt(0);
+        }
+    }
+
+    // --- منطق التعدين ---
+    document.getElementById('coin-btn').addEventListener('pointerdown', (e) => {
+        e.preventDefault(); 
+        let touches = e.getClientRects ? 1 : e.touches ? e.touches.length : 1; 
+        // لمحاكاة اللمسات المتعددة ببساطة نكرر اللوب
+        
+        if (turboActive || gameData.energy >= gameData.tapValue) {
+            let val = turboActive ? gameData.tapValue * 5 : gameData.tapValue;
+            gameData.score += val;
+            gameData.totalTaps++;
+            if(!turboActive) gameData.energy -= gameData.tapValue;
+            
+            spawnParticle(e.clientX, e.clientY, `+${val}`);
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            // ميلان العملة
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width/2;
+            const y = e.clientY - rect.top - rect.height/2;
+            e.currentTarget.style.transform = `perspective(1000px) rotateX(${-y/10}deg) rotateY(${x/10}deg) scale(0.95)`;
+            setTimeout(() => e.currentTarget.style.transform = 'scale(1)', 100);
+            
             updateUI();
         }
-    }
+    });
 
-    function spawnRocket() {
-        if (turboActive) return; 
-        const rocket = document.createElement('div');
-        rocket.className = 'turbo-rocket';
-        rocket.innerText = '🚀';
-        const padding = 40;
-        const w = window.innerWidth - (padding * 2);
-        const h = window.innerHeight - 200; 
-        rocket.style.left = `${Math.random() * w + padding}px`;
-        rocket.style.top = `${Math.random() * h + 50}px`;
-        
-        const clickHandler = (e) => {
-            e.stopPropagation(); e.preventDefault();
-            activateTurbo(); rocket.remove();
-        };
-        rocket.addEventListener('touchstart', clickHandler);
-        rocket.addEventListener('mousedown', clickHandler);
-        document.body.appendChild(rocket);
-        setTimeout(() => { if(rocket.parentNode) rocket.remove(); }, 5000);
-    }
-
-    function activateTurbo() {
-        turboActive = true;
-        document.body.classList.add('turbo-active');
-        els.coinVisual.classList.add('turbo-mode');
-        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        spawnParticle(window.innerWidth/2, window.innerHeight/2, "🔥 TURBO! 🔥");
-        setTimeout(() => {
-            turboActive = false;
-            document.body.classList.remove('turbo-active');
-            els.coinVisual.classList.remove('turbo-mode');
-        }, 10000); 
-    }
-
-    function scheduleRocket() {
-        setTimeout(() => {
-            spawnRocket();
-            scheduleRocket();
-        }, Math.random() * (30000 - 10000) + 10000);
-    }
-
-    function tiltCoin(x, y) {
-        const rect = els.coinBtn.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const rotateX = ((y - centerY) / (rect.height / 2)) * -15; 
-        const rotateY = ((x - centerX) / (rect.width / 2)) * 15;
-        els.coinBtn.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(0.95)`;
-        setTimeout(() => { els.coinBtn.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`; }, 100);
-    }
-
-    function spawnParticle(x, y, text) {
+    function spawnParticle(x, y, txt) {
         const p = document.createElement('div');
-        p.className = 'particle'; p.innerText = text;
-        p.style.left = `${x}px`; p.style.top = `${y}px`;
-        p.style.color = turboActive ? '#ff4500' : '#fff'; 
+        p.className = 'particle'; p.innerText = txt;
+        p.style.left = x + 'px'; p.style.top = y + 'px';
+        // اتجاه عشوائي
+        const tx = (Math.random() - 0.5) * 100 + 'px';
+        const ty = (Math.random() * -100 - 50) + 'px';
+        p.style.setProperty('--tx', tx);
+        p.style.setProperty('--ty', ty);
+        if(turboActive) p.style.color = '#ff4500';
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 800);
     }
 
-    function buyUpgrade(type) {
-        const cost = getCost(type);
-        if (gameData.score >= cost) {
-            gameData.score -= cost;
-            gameData.levels[type]++;
-            if (type === 'multitap') gameData.tapValue++;
-            if (type === 'energy') gameData.maxEnergy += 500;
-            if (type === 'speed') gameData.regenRate++;
-            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-            updateUI(); saveGame();
-        }
+    // --- الصاروخ (Turbo) ---
+    function scheduleRocket() {
+        setTimeout(() => {
+            if(!turboActive && document.getElementById('mine-section').style.display !== 'none') {
+                const r = document.createElement('div');
+                r.className = 'turbo-rocket'; r.innerText = '🚀';
+                r.style.left = Math.random() * 80 + 10 + '%';
+                r.style.top = Math.random() * 60 + 20 + '%';
+                r.onclick = () => {
+                    turboActive = true;
+                    document.body.classList.add('turbo-active');
+                    document.getElementById('coin-visual').classList.add('turbo');
+                    r.remove();
+                    setTimeout(() => {
+                        turboActive = false;
+                        document.body.classList.remove('turbo-active');
+                        document.getElementById('coin-visual').classList.remove('turbo');
+                    }, 10000);
+                };
+                document.body.appendChild(r);
+                setTimeout(() => r.remove(), 4000);
+            }
+            scheduleRocket();
+        }, Math.random() * 15000 + 10000);
     }
 
-    function getCost(type) {
-        if(type === 'bot') return BASE_COSTS.bot;
-        return Math.floor(BASE_COSTS[type] * Math.pow(1.8, gameData.levels[type]));
-    }
+    // --- المهام اليومية ---
+    function renderDaily() {
+        const grid = document.getElementById('daily-grid');
+        grid.innerHTML = '';
+        const rewards = [500, 1000, 2500, 5000, 15000, 50000, 100000];
+        const now = Date.now();
+        const oneDay = 86400000;
+        
+        // التحقق من مرور يوم
+        const isClaimable = (now - gameData.daily.lastClaim) > oneDay;
+        const streak = gameData.daily.streak;
 
-    function updateUI() {
-        els.score.innerText = Math.floor(gameData.score).toLocaleString();
-        els.energy.innerText = Math.floor(gameData.energy);
-        els.maxEnergy.innerText = gameData.maxEnergy.toLocaleString();
-        els.bar.style.width = `${(gameData.energy / gameData.maxEnergy) * 100}%`;
-
-        const body = document.body;
-        if (gameData.score >= 500000) {
-            els.leagueName.innerText = "💎 Diamond"; els.leagueName.style.color = "var(--diamond-blue)";
-            if(!turboActive) body.className = "league-diamond";
-        } else if (gameData.score >= 100000) {
-            els.leagueName.innerText = "🥇 Gold"; els.leagueName.style.color = "var(--notcoin-gold)";
-            if(!turboActive) body.className = "league-gold";
-        } else {
-            els.leagueName.innerText = "🥉 Bronze"; els.leagueName.style.color = "var(--bronze-brown)";
-            if(!turboActive) body.className = "league-bronze";
-        }
-
-        ['multitap', 'energy', 'speed'].forEach(type => {
-            const cost = getCost(type);
-            document.getElementById(`cost-${type}`).innerText = cost.toLocaleString();
-            document.getElementById(`lvl-${type}`).innerText = gameData.levels[type];
-            const btn = document.getElementById(`btn-${type}`);
-            btn.disabled = gameData.score < cost;
-            btn.style.opacity = gameData.score < cost ? 0.5 : 1;
+        rewards.forEach((val, i) => {
+            const div = document.createElement('div');
+            div.className = `daily-item ${i < streak ? 'claimed' : (i === streak && isClaimable ? 'active' : '')}`;
+            div.innerHTML = `<div class="daily-day">Day ${i+1}</div><div class="daily-val">${val/1000}K</div>`;
+            grid.appendChild(div);
         });
 
-        const botCost = getCost('bot');
-        const botBtn = document.getElementById('btn-bot');
-        document.getElementById('bot-status').innerText = gameData.levels.bot > 0 ? "ON" : "OFF";
-        if (gameData.levels.bot > 0) {
-            botBtn.innerText = "Purchased ✅"; botBtn.disabled = true;
+        const btn = document.getElementById('btn-claim-daily');
+        if (isClaimable && streak < 7) {
+            btn.disabled = false;
+            btn.innerText = "Claim Reward";
+            btn.onclick = () => {
+                gameData.score += rewards[streak];
+                gameData.daily.streak++;
+                gameData.daily.lastClaim = Date.now();
+                if(gameData.daily.streak >= 7) gameData.daily.streak = 0; // Reset after 7 days
+                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                tg.showAlert(`You claimed ${rewards[streak]} coins!`);
+                renderDaily(); updateUI(); saveGame();
+            };
         } else {
-            botBtn.disabled = gameData.score < botCost;
-            botBtn.style.opacity = gameData.score < botCost ? 0.5 : 1;
+            btn.disabled = true;
+            btn.innerText = streak >= 7 ? "Cycle Completed" : "Come back tomorrow";
         }
     }
 
-    setInterval(() => {
-        let changed = false;
-        if (gameData.energy < gameData.maxEnergy && !turboActive) {
-            gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + gameData.regenRate);
-            changed = true;
-        }
-        if (gameData.levels.bot > 0) {
-             gameData.score += gameData.levels.bot; 
-             changed = true;
-        }
-        if (changed) updateUI();
-    }, 1000);
+    // --- قائمة المهام ---
+    function renderTasks() {
+        const list = document.getElementById('tasks-list');
+        list.innerHTML = '';
+        TASKS_DB.forEach(task => {
+            const isDone = gameData.tasks.includes(task.id);
+            const div = document.createElement('div');
+            div.className = 'task-row';
+            div.style.opacity = isDone ? '0.5' : '1';
+            div.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-reward">+${task.reward.toLocaleString()}</div>
+                </div>
+                ${isDone ? '✅' : `<button class="btn-primary" style="width:auto; padding:5px 15px; font-size:12px;" onclick="doTask('${task.id}')">Start</button>`}
+            `;
+            list.appendChild(div);
+        });
+    }
 
-    function switchTab(tab, btn) {
-        document.querySelectorAll('.section-modal').forEach(s => s.style.display = 'none');
+    function doTask(id) {
+        const task = TASKS_DB.find(t => t.id === id);
+        if(!task) return;
+        if(task.url !== '#') window.open(task.url, '_blank');
+        
+        // محاكاة التحقق
+        tg.showConfirm("Did you complete the task?", (ok) => {
+            if(ok) {
+                gameData.score += task.reward;
+                gameData.tasks.push(id);
+                renderTasks(); updateUI();
+                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            }
+        });
+    }
+
+    // --- الليدربورد والبروفايل ---
+    function renderLeaderboard() {
+        const list = document.getElementById('leaderboard-list');
+        // بيانات وهمية لكن نضع اللاعب بينهم
+        let users = [
+            { name: "EVAR", score: 9500000 },
+            { name: "i_Crypto", score: 8200000 },
+            { name: "NotKing", score: 7100000 },
+            { name: "You", score: gameData.score, self: true }, // أنت
+            { name: "Black_Demon", score: Math.max(1000, gameData.score - 5000) }
+        ];
+        
+        users.sort((a,b) => b.score - a.score); // ترتيب تنازلي
+
+        list.innerHTML = '';
+        users.forEach((u, i) => {
+            const div = document.createElement('div');
+            div.className = 'leaderboard-row';
+            if(u.self) div.style.background = 'rgba(255, 215, 0, 0.1)';
+            div.innerHTML = `
+                <div class="rank-num rank-${i+1}">${i+1}</div>
+                <div class="lb-user">
+                    <div class="lb-avatar">${u.name.charAt(0)}</div>
+                    <div>${u.name} ${u.self ? '(You)' : ''}</div>
+                </div>
+                <div class="lb-score">${u.score.toLocaleString()}</div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    // --- التطويرات ---
+    function renderBoosts() {
+        const list = document.getElementById('boosts-list');
+        list.innerHTML = '';
+        for (let key in BOOSTS) {
+            const lvl = gameData.upgrades[key];
+            const cost = Math.floor(BOOSTS[key].base * Math.pow(1.8, lvl));
+            const isBot = key === 'bot';
+            const maxed = isBot && lvl > 0;
+            
+            const div = document.createElement('div');
+            div.className = 'card task-row';
+            div.innerHTML = `
+                <div>
+                    <div style="font-weight:bold; font-size:16px;">${BOOSTS[key].name} <span style="color:var(--gold); font-size:12px;">Lvl ${lvl}</span></div>
+                    <div style="color:#888; font-size:12px;">${BOOSTS[key].desc}</div>
+                </div>
+                <button class="btn-primary" style="width:auto;" onclick="buy('${key}')" ${maxed ? 'disabled' : ''}>
+                    ${maxed ? 'Owned' : `💰 ${cost.toLocaleString()}`}
+                </button>
+            `;
+            list.appendChild(div);
+        }
+    }
+
+    function buy(key) {
+        const lvl = gameData.upgrades[key];
+        const cost = Math.floor(BOOSTS[key].base * Math.pow(1.8, lvl));
+        if (gameData.score >= cost) {
+            gameData.score -= cost;
+            gameData.upgrades[key]++;
+            if(key === 'multitap') gameData.tapValue++;
+            if(key === 'energy') gameData.maxEnergy += 500;
+            if(key === 'speed') gameData.regenRate++;
+            
+            renderBoosts(); updateUI();
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+    }
+
+    // --- تحديث الواجهة ---
+    function updateUI() {
+        document.getElementById('score').innerText = Math.floor(gameData.score).toLocaleString();
+        document.getElementById('curr-energy').innerText = Math.floor(gameData.energy);
+        document.getElementById('max-energy').innerText = gameData.maxEnergy.toLocaleString();
+        document.getElementById('energy-fill').style.width = (gameData.energy / gameData.maxEnergy * 100) + '%';
+        document.getElementById('profile-taps').innerText = gameData.totalTaps.toLocaleString();
+
+        // تحديث الرتبة
+        const s = gameData.score;
+        let rank = "Bronze I";
+        let cls = "rank-bronze";
+        
+        if (s > 1000000) { rank = "Diamond 💎"; cls = "rank-diamond"; }
+        else if (s > 500000) { rank = "Gold III 🥇"; cls = "rank-gold"; }
+        else if (s > 200000) { rank = "Gold I 🥇"; cls = "rank-gold"; }
+        else if (s > 100000) { rank = "Silver II 🥈"; cls = "rank-silver"; }
+        else if (s > 50000) { rank = "Silver I 🥈"; cls = "rank-silver"; }
+        else if (s > 25000) { rank = "Bronze III 🥉"; cls = "rank-bronze"; }
+        else if (s > 10000) { rank = "Bronze II 🥉"; cls = "rank-bronze"; }
+
+        document.getElementById('league-display').innerText = rank;
+        if(!turboActive) document.body.className = cls;
+    }
+
+    function regenEnergy() {
+        if(gameData.energy < gameData.maxEnergy) {
+            gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + gameData.regenRate);
+            updateUI();
+        }
+    }
+
+    function saveGame() {
+        gameData.lastSave = Date.now();
+        localStorage.setItem('notcoin_v5_pro', JSON.stringify(gameData));
+    }
+
+    function nav(tab, btn) {
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
         document.getElementById('mine-section').style.display = 'none';
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        if (tab === 'mine') document.getElementById('mine-section').style.display = 'flex';
-        else document.getElementById(`${tab}-section`).style.display = 'flex';
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        
         btn.classList.add('active');
+        if(tab === 'mine') {
+            document.getElementById('mine-section').style.display = 'flex';
+        } else {
+            document.getElementById(tab+'-section').style.display = 'block';
+            if(tab === 'profile') renderLeaderboard(); // تحديث الليدربورد عند الفتح
+        }
         if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
+    
+    function connectWallet() {
+        tg.showAlert("Wallet connection coming soon! 💼");
+    }
 
-    els.coinBtn.addEventListener('mousedown', handleTap);
-    els.coinBtn.addEventListener('touchstart', handleTap, {passive: false});
     window.onload = init;
 </script>
 </body>
