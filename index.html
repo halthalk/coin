@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Notcoin Pro Ultimate</title>
+    <title>H-Coin Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -11,6 +11,7 @@
             --gold: #ffd700;
             --blue: #00bfff;
             --bronze: #cd7f32;
+            --purple: #9d00ff; /* لون البريميوم المميز */
             --bg: #000000;
             --surface: #1c1c1e;
             --surface-light: #2c2c2e;
@@ -35,6 +36,10 @@
         body.rank-silver { background: radial-gradient(circle at center, #3a3a3a 0%, #000 100%); }
         body.rank-gold { background: radial-gradient(circle at center, #3a2a03 0%, #000 100%); }
         body.rank-diamond { background: radial-gradient(circle at center, #0f0c29 0%, #000 100%); }
+        
+        /* خلفية خاصة للبريميوم */
+        body.is-premium { background: radial-gradient(circle at center, #2e003e 0%, #000 100%) !important; border: 2px solid var(--purple); }
+
         body.turbo-active { background: radial-gradient(circle at center, #551a00 0%, #000 100%) !important; }
 
         /* --- المكونات العامة --- */
@@ -45,6 +50,13 @@
         }
         .btn-primary:active { transform: scale(0.95); }
         .btn-primary:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        /* زر خاص للبريميوم */
+        .btn-premium {
+            background: linear-gradient(45deg, #9d00ff, #ff00cc);
+            color: white; box-shadow: 0 0 15px var(--purple);
+            margin-top: 10px;
+        }
 
         /* --- منطقة اللعب --- */
         .game-stage {
@@ -72,15 +84,20 @@
             border: 4px solid rgba(255,255,255,0.1);
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
             background: rgba(0,0,0,0.3);
+            position: relative;
         }
         .coin-inner img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .coin-inner.turbo { border-color: #ff4500; box-shadow: 0 0 80px #ff4500; animation: shake 0.5s infinite; }
+        
+        /* تأثير البريميوم على العملة */
+        .is-premium .coin-inner { border-color: var(--purple); box-shadow: 0 0 60px var(--purple); }
 
         @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); } }
 
         .energy-hud { width: 85%; max-width: 400px; }
         .energy-bar { background: #333; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 5px; }
         .energy-fill { height: 100%; background: linear-gradient(90deg, var(--gold), orange); width: 100%; transition: width 0.2s; }
+        .is-premium .energy-fill { background: linear-gradient(90deg, var(--purple), #ff00cc); }
 
         /* --- التنقل السفلي --- */
         .nav-bar {
@@ -212,6 +229,7 @@
             <div class="user-details">
                 <h3 style="margin:0;" id="profile-name">Loading...</h3>
                 <div class="user-tag" id="profile-username">@username</div>
+                <div id="premium-status-text" style="color:var(--purple); font-weight:bold; display:none; margin-top:5px;">💎 H-Coin Premium</div>
             </div>
             <button class="wallet-btn" onclick="connectWallet()">
                 <span>💼</span> Connect Wallet
@@ -246,6 +264,12 @@
     <div id="earn-section" class="section">
         <h2 class="section-title">Earn Coins</h2>
         
+        <div class="card" style="background: linear-gradient(135deg, #1c1c1e, #2a2a2a); border: 1px solid var(--blue);">
+            <h3 style="margin-top:0;">🤝 Invite Friends</h3>
+            <p style="font-size:13px; color:#aaa;">Invite friends to H-Coin Robot and get <span style="color:var(--gold); font-weight:bold;">500 Coins</span> per friend!</p>
+            <button class="btn-primary" style="background:var(--blue); color:white;" onclick="inviteFriend()">🔗 Share Invite Link</button>
+        </div>
+        
         <div class="card">
             <h3 style="margin-top:0;">📅 Daily Rewards</h3>
             <div class="daily-grid" id="daily-grid">
@@ -260,6 +284,23 @@
 
     <div id="boosts-section" class="section">
         <h2 class="section-title">Boosters</h2>
+        
+        <div class="card" style="border: 2px solid var(--purple); background: rgba(157, 0, 255, 0.1);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; color:white;">👑 H-Coin Premium</h3>
+                <span style="font-size:24px;">💎</span>
+            </div>
+            <p style="font-size:12px; color:#ccc; margin:10px 0;">
+                - 2x Multiplier per tap<br>
+                - Exclusive Purple Look<br>
+                - +5000 Max Energy Bonus
+            </p>
+            <button class="btn-primary btn-premium" id="btn-buy-premium" onclick="buyPremium()">
+                Buy for 200,000 Coins
+            </button>
+        </div>
+
+        <h3 style="margin:10px 0;">Normal Upgrades</h3>
         <div id="boosts-list">
             </div>
     </div>
@@ -288,10 +329,16 @@
     tg.ready(); tg.expand();
     tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000');
 
+    // --- إعدادات البوت والروابط ---
+    const BOT_USERNAME = "H_CoinRobot"; 
+    const COMMUNITY_LINK = "https://t.me/Hcoin_Community";
+    const PREMIUM_COST = 200000;
+
     // --- بيانات اللعبة ---
     let gameData = {
         score: 0, energy: 1000, maxEnergy: 1000, tapValue: 1, regenRate: 1,
         lastSave: Date.now(), totalTaps: 0,
+        isPremium: false, // حالة البريميوم الجديدة
         upgrades: { multitap: 1, energy: 1, speed: 1, bot: 0 },
         daily: { streak: 0, lastClaim: 0 },
         tasks: [] // IDs of claimed tasks
@@ -304,17 +351,19 @@
         bot: { name: "Tap Bot", base: 50000, desc: "Auto mine offline" }
     };
 
+    // تحديث رابط القناة هنا
     const TASKS_DB = [
-        { id: 'tg_chan', title: 'Join our Channel', reward: 5000, url: 'https://telegram.org' },
+        { id: 'tg_chan', title: 'Join H-Coin Community', reward: 5000, url: COMMUNITY_LINK },
         { id: 'twitter', title: 'Follow on X', reward: 5000, url: 'https://twitter.com' },
-        { id: 'invite', title: 'Invite 3 Friends', reward: 25000, url: '#' }
+        // تم نقل الدعوة لزر منفصل ولكن يمكن إبقاء مهمة لمرة واحدة
+        { id: 'share_story', title: 'Share in Story', reward: 10000, url: '#' }
     ];
 
     let turboActive = false;
 
     // --- التهيئة ---
     function init() {
-        const saved = localStorage.getItem('notcoin_v5_pro');
+        const saved = localStorage.getItem('hcoin_pro_v1'); // تغيير مفتاح الحفظ لنسخة جديدة
         if (saved) {
             let parsed = JSON.parse(saved);
             Object.assign(gameData, parsed);
@@ -323,6 +372,9 @@
             gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (seconds * gameData.regenRate));
             if(gameData.upgrades.bot > 0 && seconds > 60) {
                 let earned = Math.floor(seconds * gameData.upgrades.bot);
+                // مضاعفة البوت للبريميوم
+                if(gameData.isPremium) earned *= 2; 
+
                 if(earned > 0) {
                     gameData.score += earned;
                     tg.showAlert(`🤖 Bot mined ${earned.toLocaleString()} coins while you were away!`);
@@ -331,6 +383,7 @@
         }
         
         setupProfile();
+        checkPremiumVisuals(); // التحقق من البريميوم عند البدء
         renderBoosts();
         renderDaily();
         renderTasks();
@@ -350,9 +403,10 @@
         document.getElementById('profile-id').innerText = user.id;
         document.getElementById('profile-lang').innerText = (user.language_code || 'en').toUpperCase();
         
-        if(user.is_premium) {
+        // عرض حالة البريميوم في الجدول
+        if(gameData.isPremium) {
             const premEl = document.getElementById('profile-premium');
-            premEl.innerText = "YES 🌟"; premEl.style.color = "gold";
+            premEl.innerText = "H-COIN VIP 💎"; premEl.style.color = "#9d00ff";
         }
 
         if(user.photo_url) {
@@ -362,17 +416,83 @@
         }
     }
 
+    // --- نظام الدعوات الجديد ---
+    function inviteFriend() {
+        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
+        // رابط الإحالة الصحيح للبوت
+        const inviteLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+        const shareText = `Join me on H-Coin Pro and get rewards! 🚀`;
+        
+        // فتح نافذة المشاركة في تليجرام
+        const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
+        tg.openTelegramLink(fullUrl);
+
+        // محاكاة المكافأة (في التطبيق الحقيقي يجب أن تأتي من السيرفر)
+        // سنضيف المكافأة مباشرة هنا لغرض العرض
+        setTimeout(() => {
+            gameData.score += 500;
+            tg.showAlert("Invite link opened! You received +500 Coins reward (Simulation).");
+            updateUI();
+        }, 1000);
+    }
+
+    // --- نظام البريميوم الجديد ---
+    function buyPremium() {
+        if(gameData.isPremium) return;
+        
+        if (gameData.score >= PREMIUM_COST) {
+            tg.showConfirm(`Buy H-Coin Premium for ${PREMIUM_COST.toLocaleString()} coins?`, (ok) => {
+                if(ok) {
+                    gameData.score -= PREMIUM_COST;
+                    gameData.isPremium = true;
+                    gameData.maxEnergy += 5000; // بونص فوري للطاقة
+                    gameData.energy = gameData.maxEnergy; // ملء الطاقة
+                    
+                    checkPremiumVisuals();
+                    updateUI();
+                    saveGame();
+                    tg.showAlert("Congratulations! You are now H-Coin Premium 💎");
+                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                }
+            });
+        } else {
+            tg.showAlert(`You need ${PREMIUM_COST.toLocaleString()} coins to buy Premium!`);
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        }
+    }
+
+    function checkPremiumVisuals() {
+        const btn = document.getElementById('btn-buy-premium');
+        const statusTxt = document.getElementById('premium-status-text');
+        
+        if (gameData.isPremium) {
+            document.body.classList.add('is-premium'); // تفعيل الستايل البنفسجي
+            btn.innerText = "Active ✅";
+            btn.disabled = true;
+            statusTxt.style.display = "block";
+        } else {
+            document.body.classList.remove('is-premium');
+            btn.disabled = false;
+        }
+    }
+
     // --- منطق التعدين ---
     document.getElementById('coin-btn').addEventListener('pointerdown', (e) => {
         e.preventDefault(); 
         let touches = e.getClientRects ? 1 : e.touches ? e.touches.length : 1; 
-        // لمحاكاة اللمسات المتعددة ببساطة نكرر اللوب
         
         if (turboActive || gameData.energy >= gameData.tapValue) {
-            let val = turboActive ? gameData.tapValue * 5 : gameData.tapValue;
+            // حساب القيمة الأساسية
+            let baseVal = gameData.tapValue;
+            
+            // إذا كان بريميوم، ضاعف النقاط
+            if (gameData.isPremium) baseVal *= 2;
+            
+            let val = turboActive ? baseVal * 5 : baseVal;
+            
             gameData.score += val;
             gameData.totalTaps++;
-            if(!turboActive) gameData.energy -= gameData.tapValue;
+            if(!turboActive) gameData.energy -= gameData.tapValue; // استهلاك الطاقة يبقى كما هو
             
             spawnParticle(e.clientX, e.clientY, `+${val}`);
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
@@ -398,6 +518,9 @@
         p.style.setProperty('--tx', tx);
         p.style.setProperty('--ty', ty);
         if(turboActive) p.style.color = '#ff4500';
+        // لون الجزيئات للبريميوم
+        if(gameData.isPremium && !turboActive) p.style.color = '#d000ff'; 
+        
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 800);
     }
@@ -489,7 +612,7 @@
     function doTask(id) {
         const task = TASKS_DB.find(t => t.id === id);
         if(!task) return;
-        if(task.url !== '#') window.open(task.url, '_blank');
+        if(task.url !== '#') tg.openLink(task.url); // استخدام tg.openLink أفضل
         
         // محاكاة التحقق
         tg.showConfirm("Did you complete the task?", (ok) => {
@@ -586,6 +709,12 @@
         let rank = "Bronze I";
         let cls = "rank-bronze";
         
+        // إذا كان بريميوم يتجاوز الألوان العادية
+        if(gameData.isPremium) {
+            // نبقي الرتبة كما هي لكن الخلفية تتغير عبر CSS
+            // يمكن إضافة كلمة VIP للرتبة
+        }
+
         if (s > 1000000) { rank = "Diamond 💎"; cls = "rank-diamond"; }
         else if (s > 500000) { rank = "Gold III 🥇"; cls = "rank-gold"; }
         else if (s > 200000) { rank = "Gold I 🥇"; cls = "rank-gold"; }
@@ -594,8 +723,12 @@
         else if (s > 25000) { rank = "Bronze III 🥉"; cls = "rank-bronze"; }
         else if (s > 10000) { rank = "Bronze II 🥉"; cls = "rank-bronze"; }
 
+        if(gameData.isPremium) rank += " (VIP)";
+
         document.getElementById('league-display').innerText = rank;
-        if(!turboActive) document.body.className = cls;
+        
+        if(!turboActive && !gameData.isPremium) document.body.className = cls;
+        if(gameData.isPremium && !turboActive) document.body.className = "is-premium"; // أولوية للبريميوم
     }
 
     function regenEnergy() {
@@ -607,7 +740,7 @@
 
     function saveGame() {
         gameData.lastSave = Date.now();
-        localStorage.setItem('notcoin_v5_pro', JSON.stringify(gameData));
+        localStorage.setItem('hcoin_pro_v1', JSON.stringify(gameData));
     }
 
     function nav(tab, btn) {
