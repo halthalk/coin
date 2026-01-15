@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>H-Coin Pro</title>
+    <title>H-Coin Pro Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -50,6 +50,10 @@
         }
         .btn-primary:active { transform: scale(0.95); }
         .btn-primary:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        .btn-check {
+            background: var(--blue); color: white;
+        }
 
         /* زر خاص للبريميوم */
         .btn-premium {
@@ -102,17 +106,17 @@
         /* --- التنقل السفلي --- */
         .nav-bar {
             position: fixed; bottom: calc(10px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 500px; background: rgba(28, 28, 30, 0.95);
+            width: 96%; max-width: 500px; background: rgba(28, 28, 30, 0.95);
             backdrop-filter: blur(20px); border-radius: 25px; display: flex;
-            justify-content: space-between; padding: 10px 20px; z-index: 100;
+            justify-content: space-between; padding: 10px 10px; z-index: 100;
             border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; gap: 4px;
-            background: none; border: none; color: #666; font-size: 11px; font-weight: 700;
-            transition: 0.3s; width: 60px;
+            background: none; border: none; color: #666; font-size: 10px; font-weight: 700;
+            transition: 0.3s; width: 18%; /* تعديل العرض ليناسب 5 عناصر */
         }
-        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
         .nav-item.active { color: var(--gold); transform: translateY(-2px); }
 
         /* --- القوائم (Modals) --- */
@@ -169,6 +173,18 @@
         .task-info { flex: 1; }
         .task-title { font-size: 14px; font-weight: bold; }
         .task-reward { font-size: 12px; color: var(--gold); }
+
+        /* --- ستايل المتجر --- */
+        .shop-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+        }
+        .shop-item {
+            background: var(--surface-light); border-radius: 12px; padding: 15px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 180px;
+        }
+        .shop-img { width: 60px; height: 60px; background: #444; border-radius: 50%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;}
+        .shop-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .shop-price { color: var(--gold); font-size: 12px; margin-bottom: 10px; }
 
         /* --- ستايل الليدربورد --- */
         .leaderboard-row {
@@ -254,6 +270,10 @@
                 <span class="info-label">Total Taps</span>
                 <span class="info-val" id="profile-taps">0</span>
             </div>
+            <div class="info-row">
+                <span class="info-label">Invites</span>
+                <span class="info-val" id="profile-invites">0</span>
+            </div>
         </div>
 
         <h3 style="margin-bottom:10px;">🏆 Leaderboard</h3>
@@ -305,6 +325,19 @@
             </div>
     </div>
 
+    <div id="shop-section" class="section">
+        <h2 class="section-title">Shop (Skins)</h2>
+        <p style="text-align:center; color:#888; margin-bottom:20px;">Customize your coin look!</p>
+        
+        <div class="shop-grid">
+            <div style="grid-column: 1 / -1; text-align: center; color: #666; padding: 40px; border: 1px dashed #333; border-radius: 12px;">
+                <div style="font-size: 40px; margin-bottom: 10px;">🛍️</div>
+                No items available yet.<br>
+                <span style="color: var(--gold);">Coming Soon!</span>
+            </div>
+        </div>
+    </div>
+
     <div class="nav-bar">
         <button class="nav-item active" onclick="nav('mine', this)">
             <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z"/></svg>
@@ -317,6 +350,10 @@
         <button class="nav-item" onclick="nav('boosts', this)">
             <svg viewBox="0 0 24 24"><path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.5 2.54l2.53 1.27c.63-1.21 1-2.6 1-4.06 0-5.36-4.34-9.7-9-9.7zM12 18c-3.31 0-6-2.69-6-6 0-1.65.67-3.15 1.76-4.24L6.34 6.34C4.9 7.79 4 9.79 4 12c0 4.42 3.58 8 8 8 2.21 0 4.21-.9 5.66-2.34l-1.42-1.42C15.15 17.33 13.65 18 12 18zm.3-15.05h-1.7v3.08c-2.84.48-5.2 2.65-5.96 5.47h3.04c.55-1.2 1.63-2.07 2.92-2.07v-6.48z"/></svg>
             Boosts
+        </button>
+        <button class="nav-item" onclick="nav('shop', this)">
+            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            Shop
         </button>
         <button class="nav-item" onclick="nav('profile', this)">
             <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -338,10 +375,12 @@
     let gameData = {
         score: 0, energy: 1000, maxEnergy: 1000, tapValue: 1, regenRate: 1,
         lastSave: Date.now(), totalTaps: 0,
-        isPremium: false, // حالة البريميوم الجديدة
+        isPremium: false,
+        invites: 0, // عدد الدعوات
         upgrades: { multitap: 1, energy: 1, speed: 1, bot: 0 },
         daily: { streak: 0, lastClaim: 0 },
-        tasks: [] // IDs of claimed tasks
+        tasks: [], // IDs of claimed tasks
+        startedTasks: [] // IDs of tasks that user clicked start on
     };
 
     const BOOSTS = {
@@ -351,28 +390,27 @@
         bot: { name: "Tap Bot", base: 50000, desc: "Auto mine offline" }
     };
 
-    // تحديث رابط القناة هنا
     const TASKS_DB = [
         { id: 'tg_chan', title: 'Join H-Coin Community', reward: 5000, url: COMMUNITY_LINK },
         { id: 'twitter', title: 'Follow on X', reward: 5000, url: 'https://twitter.com' },
-        // تم نقل الدعوة لزر منفصل ولكن يمكن إبقاء مهمة لمرة واحدة
-        { id: 'share_story', title: 'Share in Story', reward: 10000, url: '#' }
+        { id: 'share_story', title: 'Share in Story', reward: 10000, url: 'STORY_SHARE' } // Special ID for story
     ];
 
     let turboActive = false;
 
     // --- التهيئة ---
     function init() {
-        const saved = localStorage.getItem('hcoin_pro_v1'); // تغيير مفتاح الحفظ لنسخة جديدة
+        const saved = localStorage.getItem('hcoin_pro_v2'); 
         if (saved) {
             let parsed = JSON.parse(saved);
             Object.assign(gameData, parsed);
-            // حساب الاوفلاين
+            if(!gameData.startedTasks) gameData.startedTasks = [];
+            if(!gameData.invites) gameData.invites = 0;
+
             let seconds = (Date.now() - gameData.lastSave) / 1000;
             gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (seconds * gameData.regenRate));
             if(gameData.upgrades.bot > 0 && seconds > 60) {
                 let earned = Math.floor(seconds * gameData.upgrades.bot);
-                // مضاعفة البوت للبريميوم
                 if(gameData.isPremium) earned *= 2; 
 
                 if(earned > 0) {
@@ -383,7 +421,7 @@
         }
         
         setupProfile();
-        checkPremiumVisuals(); // التحقق من البريميوم عند البدء
+        checkPremiumVisuals();
         renderBoosts();
         renderDaily();
         renderTasks();
@@ -403,7 +441,6 @@
         document.getElementById('profile-id').innerText = user.id;
         document.getElementById('profile-lang').innerText = (user.language_code || 'en').toUpperCase();
         
-        // عرض حالة البريميوم في الجدول
         if(gameData.isPremium) {
             const premEl = document.getElementById('profile-premium');
             premEl.innerText = "H-COIN VIP 💎"; premEl.style.color = "#9d00ff";
@@ -416,27 +453,27 @@
         }
     }
 
-    // --- نظام الدعوات الجديد ---
+    // --- نظام الدعوات + رابط الاستوري التلقائي ---
     function inviteFriend() {
         const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
-        // رابط الإحالة الصحيح للبوت
         const inviteLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
-        const shareText = `Join me on H-Coin Pro and get rewards! 🚀`;
+        const shareText = `🚀 Join me on H-Coin Pro! Mine coins and compete.\n\n👇 Start here:\n${inviteLink}`;
         
-        // فتح نافذة المشاركة في تليجرام
+        // فتح نافذة المشاركة (تظهر خيار Story تلقائياً في تليجرام)
         const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
         tg.openTelegramLink(fullUrl);
 
-        // محاكاة المكافأة (في التطبيق الحقيقي يجب أن تأتي من السيرفر)
-        // سنضيف المكافأة مباشرة هنا لغرض العرض
+        // محاكاة زيادة الدعوات
         setTimeout(() => {
+            gameData.invites++;
             gameData.score += 500;
-            tg.showAlert("Invite link opened! You received +500 Coins reward (Simulation).");
+            tg.showAlert("Invite link opened! You received +500 Coins reward and +1 Invite (Simulation).");
             updateUI();
+            saveGame();
         }, 1000);
     }
 
-    // --- نظام البريميوم الجديد ---
+    // --- نظام البريميوم ---
     function buyPremium() {
         if(gameData.isPremium) return;
         
@@ -445,8 +482,8 @@
                 if(ok) {
                     gameData.score -= PREMIUM_COST;
                     gameData.isPremium = true;
-                    gameData.maxEnergy += 5000; // بونص فوري للطاقة
-                    gameData.energy = gameData.maxEnergy; // ملء الطاقة
+                    gameData.maxEnergy += 5000;
+                    gameData.energy = gameData.maxEnergy;
                     
                     checkPremiumVisuals();
                     updateUI();
@@ -466,7 +503,7 @@
         const statusTxt = document.getElementById('premium-status-text');
         
         if (gameData.isPremium) {
-            document.body.classList.add('is-premium'); // تفعيل الستايل البنفسجي
+            document.body.classList.add('is-premium');
             btn.innerText = "Active ✅";
             btn.disabled = true;
             statusTxt.style.display = "block";
@@ -482,22 +519,17 @@
         let touches = e.getClientRects ? 1 : e.touches ? e.touches.length : 1; 
         
         if (turboActive || gameData.energy >= gameData.tapValue) {
-            // حساب القيمة الأساسية
             let baseVal = gameData.tapValue;
-            
-            // إذا كان بريميوم، ضاعف النقاط
             if (gameData.isPremium) baseVal *= 2;
-            
             let val = turboActive ? baseVal * 5 : baseVal;
             
             gameData.score += val;
             gameData.totalTaps++;
-            if(!turboActive) gameData.energy -= gameData.tapValue; // استهلاك الطاقة يبقى كما هو
+            if(!turboActive) gameData.energy -= gameData.tapValue;
             
             spawnParticle(e.clientX, e.clientY, `+${val}`);
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             
-            // ميلان العملة
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left - rect.width/2;
             const y = e.clientY - rect.top - rect.height/2;
@@ -512,13 +544,11 @@
         const p = document.createElement('div');
         p.className = 'particle'; p.innerText = txt;
         p.style.left = x + 'px'; p.style.top = y + 'px';
-        // اتجاه عشوائي
         const tx = (Math.random() - 0.5) * 100 + 'px';
         const ty = (Math.random() * -100 - 50) + 'px';
         p.style.setProperty('--tx', tx);
         p.style.setProperty('--ty', ty);
         if(turboActive) p.style.color = '#ff4500';
-        // لون الجزيئات للبريميوم
         if(gameData.isPremium && !turboActive) p.style.color = '#d000ff'; 
         
         document.body.appendChild(p);
@@ -559,7 +589,6 @@
         const now = Date.now();
         const oneDay = 86400000;
         
-        // التحقق من مرور يوم
         const isClaimable = (now - gameData.daily.lastClaim) > oneDay;
         const streak = gameData.daily.streak;
 
@@ -578,7 +607,7 @@
                 gameData.score += rewards[streak];
                 gameData.daily.streak++;
                 gameData.daily.lastClaim = Date.now();
-                if(gameData.daily.streak >= 7) gameData.daily.streak = 0; // Reset after 7 days
+                if(gameData.daily.streak >= 7) gameData.daily.streak = 0;
                 if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 tg.showAlert(`You claimed ${rewards[streak]} coins!`);
                 renderDaily(); updateUI(); saveGame();
@@ -589,55 +618,94 @@
         }
     }
 
-    // --- قائمة المهام ---
+    // --- قائمة المهام (Check + Story Logic) ---
     function renderTasks() {
         const list = document.getElementById('tasks-list');
         list.innerHTML = '';
         TASKS_DB.forEach(task => {
             const isDone = gameData.tasks.includes(task.id);
+            const isStarted = gameData.startedTasks.includes(task.id);
+            
             const div = document.createElement('div');
             div.className = 'task-row';
             div.style.opacity = isDone ? '0.5' : '1';
+            
+            let btnHtml = '';
+            if (isDone) {
+                btnHtml = '✅';
+            } else if (isStarted) {
+                btnHtml = `<button class="btn-primary btn-check" style="width:auto; padding:5px 15px; font-size:12px;" onclick="checkTask('${task.id}')">Check</button>`;
+            } else {
+                btnHtml = `<button class="btn-primary" style="width:auto; padding:5px 15px; font-size:12px;" onclick="startTask('${task.id}')">Start</button>`;
+            }
+
             div.innerHTML = `
                 <div class="task-info">
                     <div class="task-title">${task.title}</div>
                     <div class="task-reward">+${task.reward.toLocaleString()}</div>
                 </div>
-                ${isDone ? '✅' : `<button class="btn-primary" style="width:auto; padding:5px 15px; font-size:12px;" onclick="doTask('${task.id}')">Start</button>`}
+                ${btnHtml}
             `;
             list.appendChild(div);
         });
     }
 
-    function doTask(id) {
+    // بدء المهمة وفتح الرابط (خاصة الاستوري)
+    function startTask(id) {
         const task = TASKS_DB.find(t => t.id === id);
         if(!task) return;
-        if(task.url !== '#') tg.openLink(task.url); // استخدام tg.openLink أفضل
+
+        // منطق رابط الاستوري مع النص التلقائي
+        if(task.id === 'share_story') {
+             const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
+             const inviteLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+             const text = `🔥 Join me on H-Coin Pro! Mining is live.\n${inviteLink}`;
+             
+             // استخدام رابط المشاركة العام الذي يفتح خيارات الاستوري
+             const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(text)}`;
+             tg.openTelegramLink(url);
+        } else {
+            if(task.url !== '#') tg.openLink(task.url);
+        }
+
+        if(!gameData.startedTasks.includes(id)) {
+            gameData.startedTasks.push(id);
+        }
         
-        // محاكاة التحقق
-        tg.showConfirm("Did you complete the task?", (ok) => {
-            if(ok) {
-                gameData.score += task.reward;
-                gameData.tasks.push(id);
-                renderTasks(); updateUI();
-                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            }
-        });
+        saveGame();
+        renderTasks();
+    }
+
+    function checkTask(id) {
+        const task = TASKS_DB.find(t => t.id === id);
+        if(!task) return;
+
+        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        
+        gameData.score += task.reward;
+        gameData.tasks.push(id);
+        gameData.startedTasks = gameData.startedTasks.filter(tid => tid !== id);
+        
+        tg.showAlert(`Task Verified! You got +${task.reward.toLocaleString()} coins.`);
+        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        
+        saveGame();
+        renderTasks();
+        updateUI();
     }
 
     // --- الليدربورد والبروفايل ---
     function renderLeaderboard() {
         const list = document.getElementById('leaderboard-list');
-        // بيانات وهمية لكن نضع اللاعب بينهم
         let users = [
             { name: "EVAR", score: 9500000 },
             { name: "i_Crypto", score: 8200000 },
             { name: "NotKing", score: 7100000 },
-            { name: "You", score: gameData.score, self: true }, // أنت
+            { name: "You", score: gameData.score, self: true },
             { name: "Black_Demon", score: Math.max(1000, gameData.score - 5000) }
         ];
         
-        users.sort((a,b) => b.score - a.score); // ترتيب تنازلي
+        users.sort((a,b) => b.score - a.score);
 
         list.innerHTML = '';
         users.forEach((u, i) => {
@@ -703,18 +771,13 @@
         document.getElementById('max-energy').innerText = gameData.maxEnergy.toLocaleString();
         document.getElementById('energy-fill').style.width = (gameData.energy / gameData.maxEnergy * 100) + '%';
         document.getElementById('profile-taps').innerText = gameData.totalTaps.toLocaleString();
+        
+        document.getElementById('profile-invites').innerText = gameData.invites.toLocaleString();
 
-        // تحديث الرتبة
         const s = gameData.score;
         let rank = "Bronze I";
         let cls = "rank-bronze";
         
-        // إذا كان بريميوم يتجاوز الألوان العادية
-        if(gameData.isPremium) {
-            // نبقي الرتبة كما هي لكن الخلفية تتغير عبر CSS
-            // يمكن إضافة كلمة VIP للرتبة
-        }
-
         if (s > 1000000) { rank = "Diamond 💎"; cls = "rank-diamond"; }
         else if (s > 500000) { rank = "Gold III 🥇"; cls = "rank-gold"; }
         else if (s > 200000) { rank = "Gold I 🥇"; cls = "rank-gold"; }
@@ -728,7 +791,7 @@
         document.getElementById('league-display').innerText = rank;
         
         if(!turboActive && !gameData.isPremium) document.body.className = cls;
-        if(gameData.isPremium && !turboActive) document.body.className = "is-premium"; // أولوية للبريميوم
+        if(gameData.isPremium && !turboActive) document.body.className = "is-premium"; 
     }
 
     function regenEnergy() {
@@ -740,7 +803,7 @@
 
     function saveGame() {
         gameData.lastSave = Date.now();
-        localStorage.setItem('hcoin_pro_v1', JSON.stringify(gameData));
+        localStorage.setItem('hcoin_pro_v2', JSON.stringify(gameData));
     }
 
     function nav(tab, btn) {
@@ -753,7 +816,7 @@
             document.getElementById('mine-section').style.display = 'flex';
         } else {
             document.getElementById(tab+'-section').style.display = 'block';
-            if(tab === 'profile') renderLeaderboard(); // تحديث الليدربورد عند الفتح
+            if(tab === 'profile') renderLeaderboard(); 
         }
         if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
