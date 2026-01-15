@@ -799,11 +799,11 @@
     function renderLeaderboard() {
         const list = document.getElementById('leaderboard-list');
         let users = [
-            { name: "EVAR", score: 95000000 },
-            { name: "i_Crypto", score: 82000000 },
-            { name: "NotKing", score: 71000000 },
+            { name: "EVAR", score: 100000000 },
+            { name: "i_Crypto", score: 98000000 },
+            { name: "NotKing", score: 85000000 },
             { name: "You", score: gameData.score, self: true },
-            { name: "Black_Demon", score: Math.max(1000, gameData.score - 5000) }
+            { name: "Black_Demon", score: Math.max(80000000, gameData.score - 5000) }
         ];
         
         users.sort((a,b) => b.score - a.score);
