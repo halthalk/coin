@@ -11,7 +11,7 @@
             --gold: #ffd700;
             --blue: #00bfff;
             --bronze: #cd7f32;
-            --purple: #9d00ff; /* لون البريميوم المميز */
+            --purple: #9d00ff;
             --bg: #000000;
             --surface: #1c1c1e;
             --surface-light: #2c2c2e;
@@ -28,18 +28,24 @@
         body {
             background-color: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif;
             margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-            transition: background 0.5s;
+            transition: background 0.5s ease-in-out;
         }
 
-        /* --- الخلفيات المتدرجة --- */
-        body.rank-bronze { background: radial-gradient(circle at center, #2c1810 0%, #000 100%); }
-        body.rank-silver { background: radial-gradient(circle at center, #3a3a3a 0%, #000 100%); }
-        body.rank-gold { background: radial-gradient(circle at center, #3a2a03 0%, #000 100%); }
-        body.rank-diamond { background: radial-gradient(circle at center, #0f0c29 0%, #000 100%); }
+        /* --- الخلفيات المتدرجة للمستويات الجديدة --- */
+        body.rank-Bronze { background: radial-gradient(circle at center, #3d261e 0%, #000 100%); }
+        body.rank-Silver { background: radial-gradient(circle at center, #7a7a7a 0%, #000 100%); }
+        body.rank-Gold { background: radial-gradient(circle at center, #6e5508 0%, #000 100%); }
+        body.rank-Platinum { background: radial-gradient(circle at center, #366675 0%, #000 100%); }
+        body.rank-Diamond { background: radial-gradient(circle at center, #252a5c 0%, #000 100%); }
+        body.rank-Master { background: radial-gradient(circle at center, #5e003a 0%, #000 100%); }
+        body.rank-GrandMaster { background: radial-gradient(circle at center, #520000 0%, #000 100%); }
+        body.rank-Elite { background: radial-gradient(circle at center, #003812 0%, #000 100%); }
+        body.rank-Legendary { background: radial-gradient(circle at center, #5c2600 0%, #000 100%); }
+        body.rank-Mythic { background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); border: 2px solid cyan; }
         
-        /* خلفية خاصة للبريميوم */
-        body.is-premium { background: radial-gradient(circle at center, #2e003e 0%, #000 100%) !important; border: 2px solid var(--purple); }
-
+        /* بريميوم يضيف حدود فقط الآن ليسمح بظهور خلفية المستوى */
+        body.is-premium { border: 2px solid var(--purple); }
+        
         body.turbo-active { background: radial-gradient(circle at center, #551a00 0%, #000 100%) !important; }
 
         /* --- المكونات العامة --- */
@@ -51,11 +57,8 @@
         .btn-primary:active { transform: scale(0.95); }
         .btn-primary:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-        .btn-check {
-            background: var(--blue); color: white;
-        }
+        .btn-check { background: var(--blue); color: white; }
 
-        /* زر خاص للبريميوم */
         .btn-premium {
             background: linear-gradient(45deg, #9d00ff, #ff00cc);
             color: white; box-shadow: 0 0 15px var(--purple);
@@ -93,7 +96,6 @@
         .coin-inner img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .coin-inner.turbo { border-color: #ff4500; box-shadow: 0 0 80px #ff4500; animation: shake 0.5s infinite; }
         
-        /* تأثير البريميوم على العملة */
         .is-premium .coin-inner { border-color: var(--purple); box-shadow: 0 0 60px var(--purple); }
 
         @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(2deg); } 75% { transform: rotate(-2deg); } }
@@ -114,7 +116,7 @@
         .nav-item {
             display: flex; flex-direction: column; align-items: center; gap: 4px;
             background: none; border: none; color: #666; font-size: 10px; font-weight: 700;
-            transition: 0.3s; width: 18%; /* تعديل العرض ليناسب 5 عناصر */
+            transition: 0.3s; width: 18%;
         }
         .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
         .nav-item.active { color: var(--gold); transform: translateY(-2px); }
@@ -132,7 +134,7 @@
             margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* --- ستايل البروفايل --- */
+        /* --- البروفايل --- */
         .profile-header { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
         .avatar {
             width: 80px; height: 80px; border-radius: 50%; background: #333;
@@ -154,7 +156,7 @@
             margin-top: 10px;
         }
 
-        /* --- ستايل المهام (Earn) --- */
+        /* --- المهام (Earn) --- */
         .daily-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         .daily-item {
             background: var(--surface-light); border-radius: 10px; padding: 10px 5px;
@@ -169,15 +171,12 @@
             display: flex; align-items: center; justify-content: space-between;
             background: var(--surface); padding: 12px; border-radius: 12px; margin-bottom: 10px;
         }
-        .task-icon { font-size: 24px; margin-left: 10px; }
         .task-info { flex: 1; }
         .task-title { font-size: 14px; font-weight: bold; }
         .task-reward { font-size: 12px; color: var(--gold); }
 
-        /* --- ستايل المتجر --- */
-        .shop-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
-        }
+        /* --- المتجر --- */
+        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .shop-item {
             background: var(--surface-light); border-radius: 12px; padding: 15px;
             text-align: center; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 180px;
@@ -186,10 +185,8 @@
         .shop-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
         .shop-price { color: var(--gold); font-size: 12px; margin-bottom: 10px; }
 
-        /* --- ستايل الليدربورد --- */
-        .leaderboard-row {
-            display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333;
-        }
+        /* --- الليدربورد --- */
+        .leaderboard-row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
         .rank-num { width: 30px; font-weight: bold; color: #888; }
         .rank-1 { color: var(--gold); }
         .rank-2 { color: silver; }
@@ -212,13 +209,68 @@
             position: absolute; font-size: 50px; cursor: pointer; z-index: 99;
             animation: float 4s ease-in-out infinite;
         }
+
+        /* --- (جديد) إشعارات التوست --- */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 2000; width: 90%; max-width: 400px;
+            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .toast {
+            background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid var(--gold);
+            color: #fff; padding: 15px; border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 10px;
+            animation: slideIn 0.3s ease-out forwards; pointer-events: auto;
+        }
+        .toast.success { border-left-color: #00ff88; }
+        .toast.error { border-left-color: #ff3333; }
+        .toast.info { border-left-color: var(--blue); }
+
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; transform: scale(0.9); } }
+
+        /* --- (جديد) نافذة التأكيد (Modal) --- */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px); animation: fadeIn 0.2s;
+        }
+        .custom-modal {
+            background: #1c1c1e; width: 85%; max-width: 320px;
+            padding: 25px; border-radius: 20px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-cancel { background: #333; color: #fff; }
+        .btn-confirm { background: var(--gold); color: #000; }
+
+        @keyframes popIn { to { transform: scale(1); } }
     </style>
 </head>
-<body class="rank-bronze">
+<body class="rank-Bronze">
+
+    <div id="toast-container"></div>
+
+    <div id="custom-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <h3 id="modal-title" style="margin-top:0; color:white;">Confirm</h3>
+            <p id="modal-msg" style="color:#ccc; font-size:14px; margin-bottom:20px;">Are you sure?</p>
+            <div class="modal-btns">
+                <button class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn btn-confirm" id="modal-confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
 
     <div id="mine-section" class="game-stage">
         <div class="score-container">
-            <div class="league-badge" id="league-display">Bronze I</div>
+            <div class="league-badge" id="league-display">Bronze</div>
             <div class="score-val"><span id="score">0</span></div>
         </div>
 
@@ -371,16 +423,30 @@
     const COMMUNITY_LINK = "https://t.me/Hcoin_Community";
     const PREMIUM_COST = 200000;
 
+    // --- مستويات اللعبة الجديدة ---
+    const RANKS = [
+        { name: "Bronze", threshold: 0 },
+        { name: "Silver", threshold: 5000 },
+        { name: "Gold", threshold: 25000 },
+        { name: "Platinum", threshold: 100000 },
+        { name: "Diamond", threshold: 1000000 },
+        { name: "Master", threshold: 10000000 },
+        { name: "Grand Master", threshold: 50000000 },
+        { name: "Elite", threshold: 100000000 },
+        { name: "Legendary", threshold: 500000000 },
+        { name: "Mythic", threshold: 1000000000 }
+    ];
+
     // --- بيانات اللعبة ---
     let gameData = {
         score: 0, energy: 1000, maxEnergy: 1000, tapValue: 1, regenRate: 1,
         lastSave: Date.now(), totalTaps: 0,
         isPremium: false,
-        invites: 0, // عدد الدعوات
+        invites: 0,
         upgrades: { multitap: 1, energy: 1, speed: 1, bot: 0 },
         daily: { streak: 0, lastClaim: 0 },
-        tasks: [], // IDs of claimed tasks
-        startedTasks: [] // IDs of tasks that user clicked start on
+        tasks: [],
+        startedTasks: []
     };
 
     const BOOSTS = {
@@ -393,10 +459,53 @@
     const TASKS_DB = [
         { id: 'tg_chan', title: 'Join H-Coin Community', reward: 5000, url: COMMUNITY_LINK },
         { id: 'twitter', title: 'Follow on X', reward: 5000, url: 'https://twitter.com' },
-        { id: 'share_story', title: 'Share in Story', reward: 10000, url: 'STORY_SHARE' } // Special ID for story
+        { id: 'share_story', title: 'Share in Story', reward: 10000, url: 'STORY_SHARE' }
     ];
 
     let turboActive = false;
+
+    // --- دوال الإشعارات والـ Modals ---
+    function showToast(msg, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = 'ℹ️';
+        if(type === 'success') icon = '✅';
+        if(type === 'error') icon = '❌';
+
+        toast.innerHTML = `
+            <div style="font-size:20px;">${icon}</div>
+            <div style="font-size:14px; font-weight:bold;">${msg}</div>
+        `;
+        
+        container.appendChild(toast);
+        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(type === 'error' ? 'error' : 'success');
+
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    let currentConfirmCallback = null;
+    function showModal(title, msg, callback) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-msg').innerText = msg;
+        currentConfirmCallback = callback;
+        document.getElementById('custom-modal').style.display = 'flex';
+        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    function closeModal() {
+        document.getElementById('custom-modal').style.display = 'none';
+        currentConfirmCallback = null;
+    }
+
+    document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+        if (currentConfirmCallback) currentConfirmCallback(true);
+        closeModal();
+    });
 
     // --- التهيئة ---
     function init() {
@@ -415,7 +524,7 @@
 
                 if(earned > 0) {
                     gameData.score += earned;
-                    tg.showAlert(`🤖 Bot mined ${earned.toLocaleString()} coins while you were away!`);
+                    showToast(`🤖 Bot mined ${earned.toLocaleString()} coins!`, 'success');
                 }
             }
         }
@@ -453,21 +562,20 @@
         }
     }
 
-    // --- نظام الدعوات + رابط الاستوري التلقائي ---
+    // --- نظام الدعوات ---
     function inviteFriend() {
         const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
         const inviteLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
         const shareText = `🚀 Join me on H-Coin Pro! Mine coins and compete.\n\n👇 Start here:\n${inviteLink}`;
         
-        // فتح نافذة المشاركة (تظهر خيار Story تلقائياً في تليجرام)
         const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
         tg.openTelegramLink(fullUrl);
 
-        // محاكاة زيادة الدعوات
+        showToast("Invite link opened! Simulation rewards...", "success");
         setTimeout(() => {
             gameData.invites++;
             gameData.score += 500;
-            tg.showAlert("Invite link opened! You received +500 Coins reward and +1 Invite (Simulation).");
+            showToast("+500 Coins & +1 Invite (Simulated)", "success");
             updateUI();
             saveGame();
         }, 1000);
@@ -478,7 +586,7 @@
         if(gameData.isPremium) return;
         
         if (gameData.score >= PREMIUM_COST) {
-            tg.showConfirm(`Buy H-Coin Premium for ${PREMIUM_COST.toLocaleString()} coins?`, (ok) => {
+            showModal("Upgrade to Premium", `Buy H-Coin Premium for ${PREMIUM_COST.toLocaleString()} coins?`, (ok) => {
                 if(ok) {
                     gameData.score -= PREMIUM_COST;
                     gameData.isPremium = true;
@@ -488,13 +596,11 @@
                     checkPremiumVisuals();
                     updateUI();
                     saveGame();
-                    tg.showAlert("Congratulations! You are now H-Coin Premium 💎");
-                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    showToast("Congratulations! You are now Premium 💎", "success");
                 }
             });
         } else {
-            tg.showAlert(`You need ${PREMIUM_COST.toLocaleString()} coins to buy Premium!`);
-            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            showToast(`Need ${PREMIUM_COST.toLocaleString()} coins!`, "error");
         }
     }
 
@@ -565,6 +671,7 @@
                 r.style.top = Math.random() * 60 + 20 + '%';
                 r.onclick = () => {
                     turboActive = true;
+                    showToast("🚀 TURBO MODE ACTIVATED!", "success");
                     document.body.classList.add('turbo-active');
                     document.getElementById('coin-visual').classList.add('turbo');
                     r.remove();
@@ -608,8 +715,7 @@
                 gameData.daily.streak++;
                 gameData.daily.lastClaim = Date.now();
                 if(gameData.daily.streak >= 7) gameData.daily.streak = 0;
-                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                tg.showAlert(`You claimed ${rewards[streak]} coins!`);
+                showToast(`Claimed ${rewards[streak]} coins!`, "success");
                 renderDaily(); updateUI(); saveGame();
             };
         } else {
@@ -618,7 +724,7 @@
         }
     }
 
-    // --- قائمة المهام (Check + Story Logic) ---
+    // --- المهام ---
     function renderTasks() {
         const list = document.getElementById('tasks-list');
         list.innerHTML = '';
@@ -650,18 +756,14 @@
         });
     }
 
-    // بدء المهمة وفتح الرابط (خاصة الاستوري)
     function startTask(id) {
         const task = TASKS_DB.find(t => t.id === id);
         if(!task) return;
 
-        // منطق رابط الاستوري مع النص التلقائي
         if(task.id === 'share_story') {
              const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
              const inviteLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
              const text = `🔥 Join me on H-Coin Pro! Mining is live.\n${inviteLink}`;
-             
-             // استخدام رابط المشاركة العام الذي يفتح خيارات الاستوري
              const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(text)}`;
              tg.openTelegramLink(url);
         } else {
@@ -686,21 +788,20 @@
         gameData.tasks.push(id);
         gameData.startedTasks = gameData.startedTasks.filter(tid => tid !== id);
         
-        tg.showAlert(`Task Verified! You got +${task.reward.toLocaleString()} coins.`);
-        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        showToast(`Task Verified! +${task.reward.toLocaleString()}`, "success");
         
         saveGame();
         renderTasks();
         updateUI();
     }
 
-    // --- الليدربورد والبروفايل ---
+    // --- الليدربورد ---
     function renderLeaderboard() {
         const list = document.getElementById('leaderboard-list');
         let users = [
-            { name: "EVAR", score: 9500000 },
-            { name: "i_Crypto", score: 8200000 },
-            { name: "NotKing", score: 7100000 },
+            { name: "EVAR", score: 95000000 },
+            { name: "i_Crypto", score: 82000000 },
+            { name: "NotKing", score: 71000000 },
             { name: "You", score: gameData.score, self: true },
             { name: "Black_Demon", score: Math.max(1000, gameData.score - 5000) }
         ];
@@ -759,8 +860,11 @@
             if(key === 'energy') gameData.maxEnergy += 500;
             if(key === 'speed') gameData.regenRate++;
             
+            showToast("Upgrade Successful!", "success");
             renderBoosts(); updateUI();
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        } else {
+            showToast("Not enough coins!", "error");
         }
     }
 
@@ -771,27 +875,29 @@
         document.getElementById('max-energy').innerText = gameData.maxEnergy.toLocaleString();
         document.getElementById('energy-fill').style.width = (gameData.energy / gameData.maxEnergy * 100) + '%';
         document.getElementById('profile-taps').innerText = gameData.totalTaps.toLocaleString();
-        
         document.getElementById('profile-invites').innerText = gameData.invites.toLocaleString();
 
-        const s = gameData.score;
-        let rank = "Bronze I";
-        let cls = "rank-bronze";
-        
-        if (s > 1000000) { rank = "Diamond 💎"; cls = "rank-diamond"; }
-        else if (s > 500000) { rank = "Gold III 🥇"; cls = "rank-gold"; }
-        else if (s > 200000) { rank = "Gold I 🥇"; cls = "rank-gold"; }
-        else if (s > 100000) { rank = "Silver II 🥈"; cls = "rank-silver"; }
-        else if (s > 50000) { rank = "Silver I 🥈"; cls = "rank-silver"; }
-        else if (s > 25000) { rank = "Bronze III 🥉"; cls = "rank-bronze"; }
-        else if (s > 10000) { rank = "Bronze II 🥉"; cls = "rank-bronze"; }
+        // حساب الرتبة الحالية
+        let currentRank = RANKS[0];
+        for (let i = 0; i < RANKS.length; i++) {
+            if (gameData.score >= RANKS[i].threshold) {
+                currentRank = RANKS[i];
+            }
+        }
 
-        if(gameData.isPremium) rank += " (VIP)";
-
-        document.getElementById('league-display').innerText = rank;
+        let rankText = currentRank.name;
+        if(gameData.isPremium) rankText += " 💎";
+        document.getElementById('league-display').innerText = rankText;
         
-        if(!turboActive && !gameData.isPremium) document.body.className = cls;
-        if(gameData.isPremium && !turboActive) document.body.className = "is-premium"; 
+        // تحديث الخلفية
+        document.body.className = ''; 
+        if(!turboActive) {
+            // إضافة كلاس الرتبة (إزالة المسافات مثل Grand Master -> GrandMaster)
+            document.body.classList.add(`rank-${currentRank.name.replace(/\s+/g, '')}`);
+            if(gameData.isPremium) document.body.classList.add('is-premium');
+        } else {
+            document.body.classList.add('turbo-active');
+        }
     }
 
     function regenEnergy() {
@@ -822,7 +928,7 @@
     }
     
     function connectWallet() {
-        tg.showAlert("Wallet connection coming soon! 💼");
+        showToast("Wallet connection coming soon! 💼", "info");
     }
 
     window.onload = init;
