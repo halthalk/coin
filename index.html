@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>H-Coin Pro Ultimate</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -43,7 +47,6 @@
         body.rank-Legendary { background: radial-gradient(circle at center, #5c2600 0%, #000 100%); }
         body.rank-Mythic { background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); border: 2px solid cyan; }
         
-        /* بريميوم يضيف حدود فقط الآن ليسمح بظهور خلفية المستوى */
         body.is-premium { border: 2px solid var(--purple); }
         
         body.turbo-active { background: radial-gradient(circle at center, #551a00 0%, #000 100%) !important; }
@@ -210,7 +213,7 @@
             animation: float 4s ease-in-out infinite;
         }
 
-        /* --- (جديد) إشعارات التوست --- */
+        /* --- إشعارات التوست --- */
         #toast-container {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 2000; width: 90%; max-width: 400px;
@@ -231,7 +234,7 @@
         @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; transform: scale(0.9); } }
 
-        /* --- (جديد) نافذة التأكيد (Modal) --- */
+        /* --- نافذة التأكيد (Modal) --- */
         .custom-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 3000;
@@ -330,7 +333,8 @@
 
         <h3 style="margin-bottom:10px;">🏆 Leaderboard</h3>
         <div class="card" id="leaderboard-list">
-            </div>
+            Loading...
+        </div>
     </div>
 
     <div id="earn-section" class="section">
@@ -345,13 +349,13 @@
         <div class="card">
             <h3 style="margin-top:0;">📅 Daily Rewards</h3>
             <div class="daily-grid" id="daily-grid">
-                </div>
+            </div>
             <button class="btn-primary" id="btn-claim-daily" onclick="claimDaily()" disabled>Check Next Reward</button>
         </div>
 
         <h3 style="margin-bottom:10px;">🚀 Tasks List</h3>
         <div id="tasks-list">
-            </div>
+        </div>
     </div>
 
     <div id="boosts-section" class="section">
@@ -374,7 +378,7 @@
 
         <h3 style="margin:10px 0;">Normal Upgrades</h3>
         <div id="boosts-list">
-            </div>
+        </div>
     </div>
 
     <div id="shop-section" class="section">
@@ -418,12 +422,20 @@
     tg.ready(); tg.expand();
     tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000');
 
+    // ==========================================
+    // (جديد) إعدادات SUPABASE - ضع المفتاح هنا
+    // ==========================================
+    const SUPABASE_URL = 'https://gycediygokmfryutmgae.supabase.co';
+    // ⚠️ استبدل النص التالي بالـ Anon Key الطويل الخاص بك من موقع Supabase
+    const SUPABASE_KEY = 'ضع_المفتاح_الطويل_هنا_Anon_Key'; 
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     // --- إعدادات البوت والروابط ---
     const BOT_USERNAME = "H_CoinRobot"; 
     const COMMUNITY_LINK = "https://t.me/Hcoin_Community";
     const PREMIUM_COST = 200000;
 
-    // --- مستويات اللعبة الجديدة ---
+    // --- مستويات اللعبة ---
     const RANKS = [
         { name: "Bronze", threshold: 0 },
         { name: "Silver", threshold: 5000 },
@@ -507,34 +519,56 @@
         closeModal();
     });
 
-    // --- التهيئة ---
-    function init() {
+    // --- (معدل) التهيئة وتحميل البيانات ---
+    async function init() {
+        // 1. التحميل من الذاكرة المحلية (للعمل السريع)
         const saved = localStorage.getItem('hcoin_pro_v2'); 
         if (saved) {
             let parsed = JSON.parse(saved);
             Object.assign(gameData, parsed);
-            if(!gameData.startedTasks) gameData.startedTasks = [];
-            if(!gameData.invites) gameData.invites = 0;
+        }
 
-            let seconds = (Date.now() - gameData.lastSave) / 1000;
-            gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (seconds * gameData.regenRate));
-            if(gameData.upgrades.bot > 0 && seconds > 60) {
-                let earned = Math.floor(seconds * gameData.upgrades.bot);
-                if(gameData.isPremium) earned *= 2; 
+        // 2. التحميل من SUPABASE (للحصول على أحدث سكور)
+        const user = tg.initDataUnsafe.user;
+        if(user) {
+            try {
+                const { data, error } = await supabase
+                    .from('leaderboard')
+                    .select('*')
+                    .eq('telegram_id', user.id)
+                    .single();
 
-                if(earned > 0) {
-                    gameData.score += earned;
-                    showToast(`🤖 Bot mined ${earned.toLocaleString()} coins!`, 'success');
+                if(data) {
+                    // نأخذ الأكبر دائماً لحماية اللاعب من فقدان النقاط
+                    if(data.score > gameData.score) {
+                        gameData.score = data.score;
+                        gameData.totalTaps = data.total_taps;
+                        console.log("Data synced from Server");
+                    }
                 }
+            } catch (err) {
+                console.log("Offline or First time user");
             }
         }
         
+        // حساب الـ Offline Bot
+        let seconds = (Date.now() - gameData.lastSave) / 1000;
+        gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (seconds * gameData.regenRate));
+        if(gameData.upgrades.bot > 0 && seconds > 60) {
+            let earned = Math.floor(seconds * gameData.upgrades.bot);
+            if(gameData.isPremium) earned *= 2; 
+            if(earned > 0) {
+                gameData.score += earned;
+                showToast(`🤖 Bot mined ${earned.toLocaleString()} coins!`, 'success');
+            }
+        }
+
         setupProfile();
         checkPremiumVisuals();
         renderBoosts();
         renderDaily();
         renderTasks();
-        renderLeaderboard();
+        renderLeaderboard(); // تحميل الليدربورد الحقيقي
         updateUI();
         setInterval(saveGame, 2000);
         setInterval(regenEnergy, 1000);
@@ -795,34 +829,50 @@
         updateUI();
     }
 
-    // --- الليدربورد ---
-    function renderLeaderboard() {
+    // --- (معدل) الليدربورد الحقيقي من Supabase ---
+    async function renderLeaderboard() {
         const list = document.getElementById('leaderboard-list');
-        let users = [
-            { name: "EVAR", score: 100000000 },
-            { name: "i_Crypto", score: 98000000 },
-            { name: "NotKing", score: 85000000 },
-            { name: "You", score: gameData.score, self: true },
-            { name: "Black_Demon", score: Math.max(80000000, gameData.score - 5000) }
-        ];
         
-        users.sort((a,b) => b.score - a.score);
+        // لو مفيش اتصال بالسيرفر نعرض القديم مؤقتاً
+        if (!navigator.onLine) {
+            list.innerHTML = '<p style="text-align:center; color:#666;">Offline Mode</p>';
+            return;
+        }
 
-        list.innerHTML = '';
-        users.forEach((u, i) => {
-            const div = document.createElement('div');
-            div.className = 'leaderboard-row';
-            if(u.self) div.style.background = 'rgba(255, 215, 0, 0.1)';
-            div.innerHTML = `
-                <div class="rank-num rank-${i+1}">${i+1}</div>
-                <div class="lb-user">
-                    <div class="lb-avatar">${u.name.charAt(0)}</div>
-                    <div>${u.name} ${u.self ? '(You)' : ''}</div>
-                </div>
-                <div class="lb-score">${u.score.toLocaleString()}</div>
-            `;
-            list.appendChild(div);
-        });
+        try {
+            // جلب أفضل 10 لاعبين من قاعدة البيانات
+            let { data: topPlayers, error } = await supabase
+                .from('leaderboard')
+                .select('*')
+                .order('score', { ascending: false })
+                .limit(10);
+
+            if (error) throw error;
+
+            list.innerHTML = '';
+            topPlayers.forEach((u, i) => {
+                const isMe = u.telegram_id == tg.initDataUnsafe.user?.id;
+                const div = document.createElement('div');
+                div.className = 'leaderboard-row';
+                if(isMe) div.style.background = 'rgba(255, 215, 0, 0.1)';
+                
+                // التأكد من وجود اسم
+                let name = u.username || `User ${u.telegram_id.toString().slice(0,4)}`;
+                
+                div.innerHTML = `
+                    <div class="rank-num rank-${i+1}">${i+1}</div>
+                    <div class="lb-user">
+                        <div class="lb-avatar">${name.charAt(0)}</div>
+                        <div>${name} ${isMe ? '(You)' : ''}</div>
+                    </div>
+                    <div class="lb-score">${u.score.toLocaleString()}</div>
+                `;
+                list.appendChild(div);
+            });
+        } catch (err) {
+            console.error("Leaderboard error:", err);
+            list.innerHTML = '<p style="text-align:center; color:red;">Failed to load rankings</p>';
+        }
     }
 
     // --- التطويرات ---
@@ -877,7 +927,6 @@
         document.getElementById('profile-taps').innerText = gameData.totalTaps.toLocaleString();
         document.getElementById('profile-invites').innerText = gameData.invites.toLocaleString();
 
-        // حساب الرتبة الحالية
         let currentRank = RANKS[0];
         for (let i = 0; i < RANKS.length; i++) {
             if (gameData.score >= RANKS[i].threshold) {
@@ -889,10 +938,8 @@
         if(gameData.isPremium) rankText += " 💎";
         document.getElementById('league-display').innerText = rankText;
         
-        // تحديث الخلفية
         document.body.className = ''; 
         if(!turboActive) {
-            // إضافة كلاس الرتبة (إزالة المسافات مثل Grand Master -> GrandMaster)
             document.body.classList.add(`rank-${currentRank.name.replace(/\s+/g, '')}`);
             if(gameData.isPremium) document.body.classList.add('is-premium');
         } else {
@@ -907,9 +954,26 @@
         }
     }
 
-    function saveGame() {
+    // --- (معدل) حفظ اللعبة في Supabase ---
+    async function saveGame() {
         gameData.lastSave = Date.now();
+        // 1. الحفظ المحلي (أمان)
         localStorage.setItem('hcoin_pro_v2', JSON.stringify(gameData));
+
+        // 2. الحفظ السحابي
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            const { error } = await supabase
+                .from('leaderboard')
+                .upsert({ 
+                    telegram_id: user.id, 
+                    username: user.username || user.first_name, 
+                    score: Math.floor(gameData.score),
+                    total_taps: gameData.totalTaps 
+                }, { onConflict: 'telegram_id' });
+
+            if (error) console.error('Supabase Sync Error:', error.message);
+        }
     }
 
     function nav(tab, btn) {
