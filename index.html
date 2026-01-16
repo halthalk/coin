@@ -362,7 +362,7 @@
                 <strong style="color: var(--blue);">PAYMENT VIA TON WALLET</strong>
             </p>
             <button class="btn-primary btn-premium" id="btn-buy-premium" onclick="buyPremium()">
-                Buy for 0.2 TON 💎
+                Buy for 5 TON 💎
             </button>
         </div>
 
@@ -413,15 +413,15 @@
 
     // --- YOUR WALLET & CONFIG ---
     const MY_WALLET_ADDRESS = "UQCUNNp-zznGq7eR3LUchhByYeaCXWOPqnrBDdI_q6-vnGai";
-    const PREMIUM_PRICE_TON = "0.2"; // Price in TON (Display)
-    const PREMIUM_PRICE_NANO = "200000000"; // 0.2 TON * 1,000,000,000
+    const PREMIUM_PRICE_TON = "5"; // Price in TON (Display)
+    const PREMIUM_PRICE_NANO = "5000000000"; // 5 TON * 1,000,000,000
 
     const BOT_USERNAME = "H_CoinRobot"; 
     
     // --- TON CONNECT SETUP ---
-    // IMPORTANT: Replace manifestUrl with your own JSON file hosted on GitHub!
+    // UPDATED WITH YOUR MANIFEST URL
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json', 
+        manifestUrl: 'https://raw.githubusercontent.com/halthalk/coin/main/tonconnect-manifest.json', 
     });
 
     // --- GAME DATA ---
@@ -623,26 +623,26 @@
 
         showModal("Buy Premium", `Upgrade for ${PREMIUM_PRICE_TON} TON?`, async (ok) => {
             if(ok) {
-                // Prepare Transaction
                 const transaction = {
-                    validUntil: Math.floor(Date.now() / 1000) + 360, // 6 min
+                    validUntil: Math.floor(Date.now() / 1000) + 600, 
                     messages: [
                         {
-                            address: MY_WALLET_ADDRESS, 
-                            amount: PREMIUM_PRICE_NANO,
+                            address: MY_WALLET_ADDRESS,
+                            amount: PREMIUM_PRICE_NANO, // 5 TON
                         }
                     ]
                 };
 
                 try {
-                    showToast("Please approve in wallet...", "info");
-                    const result = await tonConnectUI.sendTransaction(transaction);
+                    showToast("Please verify inside your wallet...", "info");
+                    await tonConnectUI.sendTransaction(transaction);
                     
                     // Success
                     showToast("Payment Successful! Welcome VIP 💎", "success");
                     activatePremiumFeatures();
                     
                 } catch (e) {
+                    console.error("Payment Error:", e);
                     showToast("Payment Cancelled or Failed", "error");
                 }
             }
