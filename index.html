@@ -178,8 +178,23 @@
         .task-reward { font-size: 12px; color: var(--gold); }
 
         /* --- Shop --- */
-        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-
+        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 50px; }
+        
+        .shop-card {
+            background: var(--surface); border-radius: 15px; padding: 15px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            transition: transform 0.2s;
+        }
+        .shop-card:active { transform: scale(0.98); }
+        .shop-card img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .shop-card h4 { margin: 5px 0; font-size: 14px; color: #fff; }
+        
+        .btn-shop { width: 100%; padding: 8px; font-size: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn-buy-point { background: var(--gold); color: #000; }
+        .btn-buy-ton { background: #0098EA; color: #fff; }
+        .btn-select { background: #333; color: #fff; }
+        .btn-used { background: #1a1a1a; color: #555; cursor: default; border: 1px solid #333; }
         /* --- Leaderboard --- */
         .leaderboard-row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
         .rank-num { width: 30px; font-weight: bold; color: #888; }
@@ -371,18 +386,13 @@
     </div>
 
     <div id="shop-section" class="section">
-        <h2 class="section-title">Shop (Skins)</h2>
-        <p style="text-align:center; color:#888; margin-bottom:20px;">Customize your coin look!</p>
-        
-        <div class="shop-grid">
-            <div style="grid-column: 1 / -1; text-align: center; color: #666; padding: 40px; border: 1px dashed #333; border-radius: 12px;">
-                <div style="font-size: 40px; margin-bottom: 10px;">🛍️</div>
-                No items available yet.<br>
-                <span style="color: var(--gold);">Coming Soon!</span>
-            </div>
+        <h2 class="section-title">Skin Shop</h2>
+        <div style="background: rgba(255,215,0,0.1); padding:10px; border-radius:10px; margin-bottom:20px; text-align:center; font-size:12px; color:var(--gold);">
+            🎨 Skins change your coin look instantly!
         </div>
+        <div class="shop-grid" id="shop-container">
+            </div>
     </div>
-
     <div class="nav-bar">
         <button class="nav-item active" onclick="nav('mine', this)">
             <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z"/></svg>
@@ -423,7 +433,14 @@
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://raw.githubusercontent.com/halthalk/coin/main/tonconnect-manifest.json', 
     });
-
+    const SKINS = [
+        { id: 'default', name: 'Original', price: 0, type: 'owned', img: 'https://raw.githubusercontent.com/halthalk/car/cfdeeba8911952a1ec29378f39476f1cec9c649e/20260114_190253.png' },
+        { id: 'skin_1m', name: 'Silver Coin', price: 1000000, type: 'point', img: 'https://raw.githubusercontent.com/halthalk/coin/b250dd5d923dafac47c1faec4796349518ce6d46/20260116_212057.png' },
+        { id: 'skin_1.5a', name: 'Gold Pro', price: 1500000, type: 'point', img: 'https://raw.githubusercontent.com/halthalk/coin/f6e670eab917f867b2c8536664e2e969211b61b8/20260116_211035.png' },
+        { id: 'skin_1.5b', name: 'Neon Blue', price: 1500000, type: 'point', img: 'https://raw.githubusercontent.com/halthalk/coin/81f182ea430598cf8b1186085c6aa2df132968ac/20260118_115054.png' },
+        { id: 'skin_2m', name: 'Dark Matter', price: 2000000, type: 'point', img: 'https://raw.githubusercontent.com/halthalk/coin/4ae4e008b3b8fc1aa23934898b8c89d8a4ae304e/20260118_114817.png' },
+        { id: 'skin_ton', name: 'TON Master', price: 2, type: 'ton', img: 'https://raw.githubusercontent.com/halthalk/coin/7cbfcce9a8bb15e6e7f052022d57898b5ad68276/20260116_211242.png' }
+    ];
     // --- GAME DATA ---
     const RANKS = [
         { name: "Bronze", threshold: 0 },
@@ -447,9 +464,11 @@
         daily: { streak: 0, lastClaim: 0 },
         tasks: [],
         startedTasks: [],
-        wallet: null
+        wallet: null,
+        // ميزات السكنات الجديدة
+        ownedSkins: ['default'], 
+        activeSkin: 'default'
     };
-
     const BOOSTS = {
         multitap: { name: "Multitap", base: 500, desc: "+1 per tap" },
         energy: { name: "Energy Limit", base: 1000, desc: "+500 max energy" },
@@ -515,14 +534,23 @@
         if (saved) {
             let parsed = JSON.parse(saved);
             Object.assign(gameData, parsed);
+            
+            // التأكد من وجود بيانات السكنات في حالة التحديث من نسخة قديمة
+            if(!gameData.ownedSkins) gameData.ownedSkins = ['default'];
+            if(!gameData.activeSkin) gameData.activeSkin = 'default';
             if(!gameData.startedTasks) gameData.startedTasks = [];
             if(!gameData.invites) gameData.invites = 0;
 
+            // حساب الوقت اللي فات وأنت قافل اللعبة
             let seconds = (Date.now() - gameData.lastSave) / 1000;
+            
+            // 1. تجديد الطاقة وأنت قافل
             gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (seconds * gameData.regenRate));
+            
+            // 2. ميزة بوت التعدين (Bot Offline Mining)
             if(gameData.upgrades.bot > 0 && seconds > 60) {
                 let earned = Math.floor(seconds * gameData.upgrades.bot);
-                if(gameData.isPremium) earned *= 2; 
+                if(gameData.isPremium) earned *= 2; // ميزة البريميوم تضاعف ربح البوت
 
                 if(earned > 0) {
                     gameData.score += earned;
@@ -531,19 +559,27 @@
             }
         }
         
+        // تشغيل كل الوظائف الأساسية
         setupProfile();
-        checkWalletConnection(); // Check initial wallet state
+        checkWalletConnection();
         checkPremiumVisuals();
         renderBoosts();
         renderDaily();
         renderTasks();
         renderLeaderboard();
+        
+        // تشغيل نظام السكنات
+        renderShop();
+        applySkin();
+
         updateUI();
+
+        // تشغيل المؤقتات (التوفير وتجديد الطاقة)
         setInterval(saveGame, 2000);
         setInterval(regenEnergy, 1000);
         scheduleRocket();
 
-        // Listen for Wallet Changes
+        // مراقب تغييرات المحفظة
         tonConnectUI.onStatusChange(wallet => {
             if(wallet) {
                 gameData.wallet = wallet.account.address;
@@ -555,7 +591,6 @@
             saveGame();
         });
     }
-
     // --- Profile & Wallet Logic ---
     function setupProfile() {
         const user = tg.initDataUnsafe.user || { first_name: "Guest", username: "guest", id: "000000", language_code: "en" };
@@ -984,10 +1019,108 @@
         } else {
             document.getElementById(tab+'-section').style.display = 'block';
             if(tab === 'profile') renderLeaderboard(); 
+            // التعديل الجديد هنا عشان يظهر المتجر لما تضغط عليه
+            if(tab === 'shop') renderShop(); 
         }
         if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
-    
+        // --- Shop Functions ---
+    function renderShop() {
+        const container = document.getElementById('shop-container');
+        container.innerHTML = '';
+
+        SKINS.forEach(skin => {
+            const isOwned = gameData.ownedSkins.includes(skin.id);
+            const isActive = gameData.activeSkin === skin.id;
+            
+            let btnClass = 'btn-buy-point';
+            let btnText = `💰 ${(skin.price/1000000)}M`;
+            let clickAction = `buySkin('${skin.id}')`;
+
+            if(skin.type === 'ton') {
+                btnClass = 'btn-buy-ton';
+                btnText = `💎 ${skin.price} TON`;
+            }
+
+            if(isOwned) {
+                if(isActive) {
+                    btnClass = 'btn-used';
+                    btnText = 'USED';
+                    clickAction = '';
+                } else {
+                    btnClass = 'btn-select';
+                    btnText = 'Select';
+                    clickAction = `selectSkin('${skin.id}')`;
+                }
+            } else if (skin.price === 0) {
+                 btnText = 'Free';
+            }
+
+            const div = document.createElement('div');
+            div.className = 'shop-card';
+            div.innerHTML = `
+                <img src="${skin.img}">
+                <h4>${skin.name}</h4>
+                <button class="btn-shop ${btnClass}" onclick="${clickAction}" ${isActive ? 'disabled' : ''}>${btnText}</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function selectSkin(id) {
+        gameData.activeSkin = id;
+        applySkin();
+        renderShop();
+        saveGame();
+        if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    }
+
+    function applySkin() {
+        const skin = SKINS.find(s => s.id === gameData.activeSkin);
+        if(skin) {
+            document.querySelector('#coin-visual img').src = skin.img;
+        }
+    }
+
+    function buySkin(id) {
+        const skin = SKINS.find(s => s.id === id);
+        
+        if(skin.type === 'ton') {
+            if(!tonConnectUI.connected) {
+                showToast("Connect Wallet first!", "error");
+                return;
+            }
+            showModal("Buy Skin", `Purchase for ${skin.price} TON?`, async (ok) => {
+                if(ok) {
+                    const amountNano = (skin.price * 1000000000).toString();
+                    const tx = {
+                        validUntil: Math.floor(Date.now() / 1000) + 600,
+                        messages: [{ address: MY_WALLET_ADDRESS, amount: amountNano }]
+                    };
+                    try {
+                        await tonConnectUI.sendTransaction(tx);
+                        gameData.ownedSkins.push(id);
+                        showToast("Skin Purchased!", "success");
+                        renderShop(); saveGame();
+                    } catch(e) { showToast("Transaction Failed", "error"); }
+                }
+            });
+        } else {
+            // Points Purchase
+            if(gameData.score >= skin.price) {
+                showModal("Buy Skin", `Purchase for ${skin.price.toLocaleString()} coins?`, (ok) => {
+                    if(ok) {
+                        gameData.score -= skin.price;
+                        gameData.ownedSkins.push(id);
+                        showToast("Skin Unlocked!", "success");
+                        renderShop(); updateUI(); saveGame();
+                    }
+                });
+            } else {
+                showToast("Not enough coins!", "error");
+            }
+        }
+    }
     window.onload = init;
 </script>
 </body>
