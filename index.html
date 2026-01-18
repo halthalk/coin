@@ -246,10 +246,101 @@
         .btn-confirm { background: var(--gold); color: #000; }
 
         @keyframes popIn { to { transform: scale(1); } }
+        /* تصميم أزرار التبديل الزجاجية المتوهجة */
+.shop-tabs-container {
+    display: flex; 
+    gap: 12px; 
+    margin-bottom: 25px;
+    background: rgba(255, 255, 255, 0.03); /* خلفية خافتة جداً */
+    padding: 8px;
+    border-radius: 20px; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px); /* تأثير الزجاج الضبابي */
+}
+
+.shop-tab {
+    flex: 1; 
+    padding: 14px; 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05); 
+    color: rgba(255, 255, 255, 0.6); 
+    font-weight: 900;
+    font-family: 'Cairo', sans-serif; 
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    gap: 8px; 
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* تأثير الزر عند التفعيل (Active) */
+.shop-tab.active {
+    background: rgba(255, 215, 0, 0.15); /* لون ذهبي شفاف */
+    color: var(--gold);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.2), /* توهج خارجي */
+        inset 0 0 10px rgba(255, 215, 0, 0.2); /* توهج داخلي */
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); /* توهج النص */
+}
+
+/* إضافة لمعة بريق عند مرور الوقت أو الضغط */
+.shop-tab::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: 0.5s;
+    pointer-events: none;
+}
+
+.shop-tab.active::after {
+    left: 100%;
+    transition: 0.7s;
+}
+/* --- تأثير النجوم في المتجر --- */
+.star-preview-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #000;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    from { transform: translateY(-10px); }
+    to { transform: translateY(180px); } 
+}
+@keyframes pulse {
+    0% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+    100% { opacity: 0.2; transform: scale(1); }
+}
     </style>
 </head>
 <body class="rank-Bronze">
-
+    <div id="main-star-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;"></div>
+    
     <div id="toast-container"></div>
 
     <div id="custom-modal" class="custom-modal-overlay">
@@ -371,16 +462,51 @@
     </div>
 
     <div id="shop-section" class="section">
-        <h2 class="section-title">Shop (Skins)</h2>
-        <p style="text-align:center; color:#888; margin-bottom:20px;">Customize your coin look!</p>
-        
-        <div class="shop-grid">
-            <div style="grid-column: 1 / -1; text-align: center; color: #666; padding: 40px; border: 1px dashed #333; border-radius: 12px;">
-                <div style="font-size: 40px; margin-bottom: 10px;">🛍️</div>
-                No items available yet.<br>
-                <span style="color: var(--gold);">Coming Soon!</span>
-            </div>
+        <h2 class="section-title">H-Coin Store</h2>
+
+<div class="shop-tabs-container">
+    <button id="tab-coins" class="shop-tab active" onclick="switchShopTab('coins')">💰 Coins</button>
+    <button id="tab-bg" class="shop-tab" onclick="switchShopTab('bg')">🖼️ Backgrounds</button>
+</div>
+
+<div id="content-coins">
+    <div class="card" style="border: 2px solid var(--purple); background: rgba(157, 0, 255, 0.1); padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; color:white;">👑 Premium Pack</h3>
+            <span style="font-size:30px;">💎</span>
         </div>
+        <button class="btn-primary btn-premium" id="btn-buy-premium-shop" style="margin-top:15px;" onclick="buyPremium()">Unlock for 5 TON</button>
+    </div>
+    <div style="margin-top: 25px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h3 style="margin: 0; color: var(--gold); font-size: 18px;">🎁 Free Coins</h3>
+            <div style="flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); opacity: 0.3;"></div>
+        </div>
+        <p style="color:#666; font-size:12px;">Complete tasks to earn more!</p>
+    </div>
+</div>
+
+<div id="content-bg" style="display: none;">
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+        
+        <div class="card" style="text-align: center; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="width: 100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, #1c1c1e, #000); border-radius: 20px; overflow: hidden; margin-bottom: 8px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 30px;">
+                
+            </div>
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Classic Dark</div>
+            <button class="btn-primary" style="font-size:10px; padding:6px; background: #444; color: #aaa;" disabled>Default</button>
+        </div>
+
+        <div class="card" style="text-align: center; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+    <div id="star-container" class="star-preview-box">
+        </div>
+    <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Starfall Night</div>
+    <button class="btn-primary" id="btn-buy-stars" style="font-size:10px; padding:6px;" onclick="buyStarsBackground()">Buy for 0.5 TON 💎</button>
+</div>
+
+    </div>
+    <p style="text-align:center; color:#666; font-size:12px; margin-top:20px;">More backgrounds coming soon...</p>
+</div>
     </div>
 
     <div class="nav-bar">
@@ -437,10 +563,17 @@
         { name: "Legendary", threshold: 500000000 },
         { name: "Mythic", threshold: 1000000000 }
     ];
-
-    let gameData = {
-        score: 0, energy: 1000, maxEnergy: 1000, tapValue: 1, regenRate: 1,
-        lastSave: Date.now(), totalTaps: 0,
+    
+        let gameData = {
+        ownedStarsBg: false, // ضيف السطر ده هنا في الأول
+        score: 0, 
+        energy: 1000, 
+        maxEnergy: 1000, 
+        tapValue: 1, 
+        regenRate: 1,
+        token: 0,
+        lastSave: Date.now(), 
+        totalTaps: 0,
         isPremium: false,
         invites: 0,
         upgrades: { multitap: 1, energy: 1, speed: 1, bot: 0 },
@@ -514,16 +647,26 @@
         const saved = localStorage.getItem('hcoin_pro_v2'); 
         if (saved) {
             let parsed = JSON.parse(saved);
-            Object.assign(gameData, parsed);
+
+            // التحقق من الحماية
+            const expectedToken = (parsed.score * 7) + 123;
+            if (parsed.token && Math.abs(parsed.token - expectedToken) > 1) { 
+                gameData.score = 0; 
+            } else {
+                Object.assign(gameData, parsed);
+            }
+
             if(!gameData.startedTasks) gameData.startedTasks = [];
             if(!gameData.invites) gameData.invites = 0;
 
+            // حساب الطاقة المجمعة أثناء الغياب
             let seconds = (Date.now() - gameData.lastSave) / 1000;
             gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + (seconds * gameData.regenRate));
+            
+            // حساب أرباح البوت
             if(gameData.upgrades.bot > 0 && seconds > 60) {
                 let earned = Math.floor(seconds * gameData.upgrades.bot);
                 if(gameData.isPremium) earned *= 2; 
-
                 if(earned > 0) {
                     gameData.score += earned;
                     showToast(`🤖 Bot mined ${earned.toLocaleString()} coins!`, 'success');
@@ -532,30 +675,35 @@
         }
         
         setupProfile();
-        checkWalletConnection(); // Check initial wallet state
+        checkWalletConnection();
         checkPremiumVisuals();
+
+        // تحديث حالة زر الخلفية عند التشغيل
+        if(gameData.ownedStarsBg) {
+            const btn = document.getElementById('btn-buy-stars');
+            if(btn) {
+                btn.innerText = "Owned ✅";
+                btn.disabled = true;
+                btn.style.background = "#444";
+            }
+        }
+
         renderBoosts();
         renderDaily();
         renderTasks();
         renderLeaderboard();
         updateUI();
+        
         setInterval(saveGame, 2000);
         setInterval(regenEnergy, 1000);
         scheduleRocket();
-
-        // Listen for Wallet Changes
-        tonConnectUI.onStatusChange(wallet => {
-            if(wallet) {
-                gameData.wallet = wallet.account.address;
-                showToast("Wallet Connected Successfully! 💼", "success");
-            } else {
-                gameData.wallet = null;
-            }
-            setupProfile();
-            saveGame();
-        });
     }
-
+    function saveGame() {
+        gameData.lastSave = Date.now();
+        // تحديث التوكن قبل الحفظ مباشرة لضمان التطابق
+        gameData.token = (gameData.score * 7) + 123; 
+        localStorage.setItem('hcoin_pro_v2', JSON.stringify(gameData));
+    }
     // --- Profile & Wallet Logic ---
     function setupProfile() {
         const user = tg.initDataUnsafe.user || { first_name: "Guest", username: "guest", id: "000000", language_code: "en" };
@@ -659,47 +807,66 @@
     }
 
     function checkPremiumVisuals() {
-        const btn = document.getElementById('btn-buy-premium');
+        const btnBoosts = document.getElementById('btn-buy-premium');
+        const btnShop = document.getElementById('btn-buy-premium-shop'); 
         const statusTxt = document.getElementById('premium-status-text');
         
         if (gameData.isPremium) {
             document.body.classList.add('is-premium');
-            btn.innerText = "Premium Active ✅";
-            btn.disabled = true;
-            statusTxt.style.display = "block";
+            if(btnBoosts) { btnBoosts.innerText = "Premium Active ✅"; btnBoosts.disabled = true; }
+            if(btnShop) { btnShop.innerText = "Premium Active ✅"; btnShop.disabled = true; }
+            if(statusTxt) statusTxt.style.display = "block";
         } else {
             document.body.classList.remove('is-premium');
-            btn.disabled = false;
+            if(btnBoosts) btnBoosts.disabled = false;
+            if(btnShop) btnShop.disabled = false;
         }
     }
-
     // --- Core Game Logic ---
-    document.getElementById('coin-btn').addEventListener('pointerdown', (e) => {
-        e.preventDefault(); 
-        let touches = e.getClientRects ? 1 : e.touches ? e.touches.length : 1; 
-        
-        if (turboActive || gameData.energy >= gameData.tapValue) {
-            let baseVal = gameData.tapValue;
-            if (gameData.isPremium) baseVal *= 2;
-            let val = turboActive ? baseVal * 5 : baseVal;
-            
-            gameData.score += val;
-            gameData.totalTaps++;
-            if(!turboActive) gameData.energy -= gameData.tapValue;
-            
-            spawnParticle(e.clientX, e.clientY, `+${val}`);
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            
-            const rect = e.target.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width/2;
-            const y = e.clientY - rect.top - rect.height/2;
-            e.currentTarget.style.transform = `perspective(1000px) rotateX(${-y/10}deg) rotateY(${x/10}deg) scale(0.95)`;
-            setTimeout(() => e.currentTarget.style.transform = 'scale(1)', 100);
-            
-            updateUI();
-        }
-    });
+// أضف هذا الكود بدلاً منه
+document.getElementById('coin-btn').addEventListener('pointerdown', (e) => {
+    // منع السلوك الافتراضي عشان ميعملش Zoom أو سحب للعملة
+    if (e.cancelable) e.preventDefault(); 
 
+    // التأكد إن فيه طاقة كافية أو إن وضع الـ Turbo شغال
+    if (turboActive || gameData.energy >= gameData.tapValue) {
+        // حساب قيمة النقرة
+        let baseVal = gameData.tapValue;
+        if (gameData.isPremium) baseVal *= 2;
+        let val = turboActive ? baseVal * 5 : baseVal;
+        
+        // تحديث البيانات
+        gameData.score += val;
+        gameData.totalTaps++;
+        
+        if (!turboActive) {
+            gameData.energy -= gameData.tapValue;
+        }
+        
+        // إظهار الرقم (+1) في مكان الصباع بالظبط
+        spawnParticle(e.clientX, e.clientY, `+${val}`);
+        
+        // اهتزاز الموبايل عند كل لمسة
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+        
+        // تأثير حركة العملة (ميلان العملة في اتجاه اللمس)
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        
+        e.currentTarget.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg) scale(0.95)`;
+        
+        // رجوع العملة لوضعها الطبيعي بعد 100 ملي ثانية
+        setTimeout(() => {
+            e.currentTarget.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+        }, 100);
+        
+        // تحديث واجهة المستخدم (العدادات)
+        updateUI();
+    }
+});
     function spawnParticle(x, y, txt) {
         const p = document.createElement('div');
         p.className = 'particle'; p.innerText = txt;
@@ -923,15 +1090,29 @@
         if(gameData.isPremium) rankText += " 💎";
         document.getElementById('league-display').innerText = rankText;
         
+        // مسح أي كلاسات ألوان قديمة
         document.body.className = ''; 
-        if(!turboActive) {
-            document.body.classList.add(`rank-${currentRank.name.replace(/\s+/g, '')}`);
-            if(gameData.isPremium) document.body.classList.add('is-premium');
-        } else {
+
+        // التحقق من أولوية الخلفية
+        if(gameData.ownedStarsBg && !turboActive) {
+            // لو شاري النجوم والتربو مش شغال -> ثبت خلفية النجوم في كل المستويات
+            document.body.style.background = "radial-gradient(circle at center, #001529 0%, #000 100%)";
+            initStarEffectMain(); 
+        } else if (turboActive) {
+            // لو التربو شغال -> تظهر خلفية التربو البرتقالية (أولوية قصوى للتنبيه)
             document.body.classList.add('turbo-active');
+            document.body.style.background = ""; 
+            const container = document.getElementById('main-star-container');
+            if(container) container.innerHTML = ''; 
+        } else {
+            // لو مش شاري النجوم -> شغل خلفيات المستويات العادية (برونز، سيلفر...)
+            document.body.classList.add(`rank-${currentRank.name.replace(/\s+/g, '')}`);
+            document.body.style.background = ""; 
+            if(gameData.isPremium) document.body.classList.add('is-premium');
+            const container = document.getElementById('main-star-container');
+            if(container) container.innerHTML = '';
         }
     }
-
     function renderLeaderboard() {
         const list = document.getElementById('leaderboard-list');
         let users = [
@@ -967,11 +1148,69 @@
             updateUI();
         }
     }
+        // دالة شراء خلفية النجوم بـ TON
+    async function buyStarsBackground() {
+        if (!tonConnectUI.connected) {
+            showToast("Please connect wallet first!", "error");
+            await tonConnectUI.openModal();
+            return;
+        }
 
-    function saveGame() {
-        gameData.lastSave = Date.now();
-        localStorage.setItem('hcoin_pro_v2', JSON.stringify(gameData));
+        showModal("Buy Background", "Purchase 'Starfall Night' for 0.5 TON?", async (ok) => {
+            if(ok) {
+                const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 600, 
+                    messages: [{
+                        address: MY_WALLET_ADDRESS,
+                        amount: "500000000", // 0.5 TON
+                    }]
+                };
+
+                try {
+                    showToast("Please verify in your wallet...", "info");
+                    await tonConnectUI.sendTransaction(transaction);
+                    
+                    showToast("Background Purchased! 🌌", "success");
+                    
+                    const btn = document.getElementById('btn-buy-stars');
+                    if(btn) {
+                        btn.innerText = "Owned ✅";
+                        btn.disabled = true;
+                        btn.style.background = "#444";
+                    }
+                    gameData.ownedStarsBg = true;
+                    saveGame();
+                    
+                } catch (e) {
+                    showToast("Payment Failed", "error");
+                }
+            }
+        });
     }
+    // --- دالة التبديل بين أقسام المتجر (جديد) ---
+    function switchShopTab(tab) {
+        const coinsContent = document.getElementById('content-coins');
+        const bgContent = document.getElementById('content-bg');
+        const coinsBtn = document.getElementById('tab-coins');
+        const bgBtn = document.getElementById('tab-bg');
+
+        if (tab === 'coins') {
+            if(coinsContent) coinsContent.style.display = 'block';
+            if(bgContent) bgContent.style.display = 'none';
+            if(coinsBtn) coinsBtn.classList.add('active');
+            if(bgBtn) bgBtn.classList.remove('active');
+        } else {
+            if(coinsContent) coinsContent.style.display = 'none';
+            if(bgContent) bgContent.style.display = 'block';
+            if(bgBtn) bgBtn.classList.add('active');
+            if(coinsBtn) coinsBtn.classList.remove('active');
+            
+            // تشغيل النجوم
+            initStarEffect();
+        }
+        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+    // -------------------------------------------
 
     function nav(tab, btn) {
         document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
@@ -987,7 +1226,87 @@
         }
         if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
-    
+        // الكود الجديد بتاع الشراء
+    async function buyStarsBackground() {
+        if (!tonConnectUI.connected) {
+            showToast("Please connect wallet first!", "error");
+            await tonConnectUI.openModal();
+            return;
+        }
+
+        showModal("Buy Background", "Purchase 'Starfall Night' for 0.5 TON?", async (ok) => {
+            if(ok) {
+                const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 600, 
+                    messages: [{
+                        address: MY_WALLET_ADDRESS,
+                        amount: "500000000", // 0.5 TON
+                    }]
+                };
+
+                try {
+                    showToast("Please verify in your wallet...", "info");
+                    await tonConnectUI.sendTransaction(transaction);
+                    
+                    showToast("Background Purchased! 🌌", "success");
+                    
+                    const btn = document.getElementById('btn-buy-stars');
+                    if(btn) {
+                        btn.innerText = "Owned ✅";
+                        btn.disabled = true;
+                        btn.style.background = "#444";
+                    }
+                    gameData.ownedStarsBg = true;
+                    saveGame();
+                    
+                } catch (e) {
+                    showToast("Payment Failed", "error");
+                }
+            }
+        });
+    }
+
+    // الدالة القديمة اللي كانت موجودة أصلاً
+    function initStarEffect() {
+    const container = document.getElementById('star-container');
+    if (!container) return;
+    container.innerHTML = ''; 
+    const numberOfStars = 40; 
+    for (let i = 0; i < numberOfStars; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        const size = Math.random() * 2 + 1; 
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        star.style.animationDelay = (Math.random() * 5) + 's';
+        container.appendChild(star);
+    }
+}
+        // --- دالة تأثير النجوم في الخلفية الرئيسية ---
+    function initStarEffectMain() {
+        const container = document.getElementById('main-star-container');
+        if (!container || container.innerHTML !== '') return; 
+        
+        const numberOfStars = 50; 
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            const size = Math.random() * 2 + 1; 
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%'; 
+            star.style.position = 'absolute';
+            star.style.backgroundColor = 'white';
+            star.style.borderRadius = '50%';
+            star.style.opacity = Math.random();
+            star.style.animation = `pulse ${Math.random() * 3 + 2}s infinite`;
+            container.appendChild(star);
+        }
+    }
+
     window.onload = init;
 </script>
 </body>
