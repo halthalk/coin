@@ -486,47 +486,64 @@
 <script>
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
+/* ----------------------------------------------------------------
+   🛡️ H-COIN PRO: ADVANCED SECURITY & ANTI-TAMPER SYSTEM
+   Status: ACTIVE | Encryption: ENABLED | Layer: CLIENT-SIDE
+   ----------------------------------------------------------------
+*/
+(function(_0xGuard) {
+    const _ctrlKeys = [73, 74, 67, 85, 83]; // I, J, C, U, S
+    const _dangerZone = () => {
+        try {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.replace("about:blank");
+        } catch (e) {}
+    };
 
-    /* --- 🛡️ H-COIN QUANTUM PROTECTOR v3.0 --- */
-    (function() {
-        const _0x_r = atob('YWJvdXQ6Ymxhbms='); // about:blank
-        const _0x_s = atob('bG9jYWxTdG9yYWdl'); // localStorage
+    // 1. نظام كشف المحللين (Self-Destruct Debugger)
+    const _check = function() {
+        const _start = performance.now();
+        debugger;
+        if (performance.now() - _start > 40) {
+            console.warn("⚠️ SECURITY BREACH DETECTED!");
+            _dangerZone();
+        }
+    };
 
-        const _terminate = () => {
-            try {
-                window[_0x_s].clear(); // مسح نقاط الهاكر نهائياً
-                window.location.replace(_0x_r); // طرده لصفحة فارغة
-            } catch (e) { window.location.reload(); }
-        };
+    // 2. قفل اختصارات الكيبورد (Keyboard Lockdown)
+    window.addEventListener('keydown', (e) => {
+        const isF12 = e.keyCode === 123;
+        const isDevTools = e.ctrlKey && e.shiftKey && _ctrlKeys.includes(e.keyCode);
+        const isSource = e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83);
 
-        // 1. فخ المتصفح (Infinite Loop Trap)
-        const _detect = function() {
-            const _v = /./;
-            _v.toString = function() { _terminate(); return '🛡️'; };
-            console.log('%c', _v);
-        };
-
-        // 2. حماية الـ Console ومنع التلاعب
-        setInterval(() => {
-            const _start = performance.now();
-            debugger; 
-            if (performance.now() - _start > 50) _terminate();
-            _detect();
-        }, 500);
-
-        // 3. قفل لوحة المفاتيح والماوس (Lockdown)
-        window.addEventListener('keydown', (e) => {
-            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && [85, 83, 65, 80].includes(e.keyCode))) {
-                e.preventDefault();
-                return false;
+        if (isF12 || isDevTools || isSource) {
+            e.preventDefault();
+            if(window.Telegram?.WebApp?.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-        }, true);
+            return false;
+        }
+    }, true);
 
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('selectstart', e => e.preventDefault());
-        document.addEventListener('dragstart', e => e.preventDefault());
-    })();
-    /* ---------------------------------------- */
+    // 3. منع التفاعلات المشبوهة (Mouse & UI Protection)
+    const _stopEvent = (e) => e.preventDefault();
+    document.addEventListener('contextmenu', _stopEvent);
+    document.addEventListener('dragstart', _stopEvent);
+    
+    // 4. مراقبة حجم النافذة (Console Resize Detection)
+    window.addEventListener('resize', () => {
+        if ((window.outerHeight - window.innerHeight) > 160 || (window.outerWidth - window.innerWidth) > 160) {
+            _dangerZone();
+        }
+    });
+
+    // تشغيل الحماية الدائمة
+    setInterval(_check, 800);
+    console.log("%c 🛡️ H-Coin Shield Active", "color: gold; font-weight: bold; font-size: 14px;");
+
+})(window);
+/* ---------------------------------------------------------------- */
     tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000');
 
     // --- YOUR WALLET & CONFIG ---
