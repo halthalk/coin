@@ -261,6 +261,35 @@
         .btn-confirm { background: var(--gold); color: #000; }
 
         @keyframes popIn { to { transform: scale(1); } }
+        /* --- Ads Section Styles --- */
+.ads-banner {
+    background: linear-gradient(135deg, #ff4500, #ff8c00);
+    color: white; padding: 20px; border-radius: 20px; text-align: center;
+    margin: 15px 0; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+    border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; position: relative; overflow: hidden;
+}
+.ads-banner:active { transform: scale(0.97); }
+.ads-banner h3 { margin: 0; font-size: 20px; font-weight: 900; }
+.ads-banner p { margin: 5px 0 0; font-size: 12px; opacity: 0.9; }
+.ad-input-area {
+    width: 100%; background: #111; border: 1px solid #333; color: white;
+    padding: 15px; border-radius: 12px; font-family: 'Cairo', sans-serif;
+    font-size: 14px; min-height: 120px; resize: none; margin-bottom: 15px; transition: 0.3s;
+}
+.ad-input-area:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+.tier-card {
+    background: var(--surface-light); border: 2px solid transparent;
+    padding: 12px; border-radius: 15px; margin-bottom: 10px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; transition: 0.2s;
+}
+.tier-card.selected { border-color: var(--gold); background: rgba(255, 215, 0, 0.1); }
+.tier-info h4 { margin: 0; font-size: 15px; color: white; }
+.tier-info p { margin: 3px 0 0; font-size: 11px; color: #aaa; }
+.tier-price { text-align: right; }
+.price-coin { color: var(--gold); font-weight: bold; font-size: 13px; display: block; }
+.price-ton { color: var(--blue); font-weight: bold; font-size: 13px; display: block; }
+.ads-footer-btns { position: sticky; bottom: 0; background: var(--bg); padding: 15px 0; display: flex; gap: 10px; }
+
     </style>
 </head>
 <body class="rank-Bronze">
@@ -380,6 +409,11 @@
                 Buy for 5 TON 💎
             </button>
         </div>
+<div class="ads-banner" onclick="openAdsManager()">
+    <h3>📢 Make Ads</h3>
+    <p>Promote your content to our community!</p>
+    <div style="position:absolute; right:-10px; bottom:-5px; font-size:50px; opacity:0.1;">📣</div>
+</div>
 
         <h3 style="margin:10px 0;">Normal Upgrades</h3>
         <div id="boosts-list"></div>
@@ -393,6 +427,39 @@
         <div class="shop-grid" id="shop-container">
             </div>
     </div>
+   <div id="ads-section" class="section" style="z-index: 1000;">
+    <div style="display:flex; align-items:center; margin-bottom:20px;">
+        <button onclick="closeAdsManager()" style="background:none; border:none; color:white; font-size:24px; padding-right:15px; cursor:pointer;">❌</button>
+        <h2 style="margin:0;">Ads Manager</h2>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color:var(--gold); font-size: 16px;">1. Post Content</h3>
+        <textarea id="ad-text-input" class="ad-input-area" placeholder="Enter your message, links, and emojis here..."></textarea>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color:var(--gold); font-size: 16px;">2. Select Reach</h3>
+        <div class="tier-card" id="tier-1" onclick="selectAdTier(1)">
+            <div class="tier-info"><h4>Basic Pack</h4><p>Post in 1 Channel</p></div>
+            <div class="tier-price"><span class="price-coin">1M Coins</span><span class="price-ton">0.5 TON</span></div>
+        </div>
+        <div class="tier-card" id="tier-2" onclick="selectAdTier(2)">
+            <div class="tier-info"><h4>Pro Pack</h4><p>Post in 2 Channels</p></div>
+            <div class="tier-price"><span class="price-coin">2M Coins</span><span class="price-ton">1.0 TON</span></div>
+        </div>
+        <div class="tier-card" id="tier-3" onclick="selectAdTier(3)">
+            <div class="tier-info"><h4>Ultimate Pack 🔥</h4><p>Post in ALL 4 Channels</p></div>
+            <div class="tier-price"><span class="price-coin">3.5M Coins</span><span class="price-ton">2.0 TON</span></div>
+        </div>
+    </div>
+
+    <div class="ads-footer-btns">
+        <button class="btn-primary" onclick="processAdPayment('points')">Pay Coins 🟡</button>
+        <button class="btn-primary" style="background:#0098EA; color:white;" onclick="processAdPayment('ton')">Pay TON 💎</button>
+    </div>
+</div>
+
     <div class="nav-bar">
         <button class="nav-item active" onclick="nav('mine', this)">
             <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z"/></svg>
@@ -419,6 +486,47 @@
 <script>
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
+
+    /* --- 🛡️ H-COIN QUANTUM PROTECTOR v3.0 --- */
+    (function() {
+        const _0x_r = atob('YWJvdXQ6Ymxhbms='); // about:blank
+        const _0x_s = atob('bG9jYWxTdG9yYWdl'); // localStorage
+
+        const _terminate = () => {
+            try {
+                window[_0x_s].clear(); // مسح نقاط الهاكر نهائياً
+                window.location.replace(_0x_r); // طرده لصفحة فارغة
+            } catch (e) { window.location.reload(); }
+        };
+
+        // 1. فخ المتصفح (Infinite Loop Trap)
+        const _detect = function() {
+            const _v = /./;
+            _v.toString = function() { _terminate(); return '🛡️'; };
+            console.log('%c', _v);
+        };
+
+        // 2. حماية الـ Console ومنع التلاعب
+        setInterval(() => {
+            const _start = performance.now();
+            debugger; 
+            if (performance.now() - _start > 50) _terminate();
+            _detect();
+        }, 500);
+
+        // 3. قفل لوحة المفاتيح والماوس (Lockdown)
+        window.addEventListener('keydown', (e) => {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && [85, 83, 65, 80].includes(e.keyCode))) {
+                e.preventDefault();
+                return false;
+            }
+        }, true);
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+    })();
+    /* ---------------------------------------- */
     tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000');
 
     // --- YOUR WALLET & CONFIG ---
@@ -433,6 +541,55 @@
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://raw.githubusercontent.com/halthalk/coin/main/tonconnect-manifest.json', 
     });
+    const AD_CHANNELS = [
+    { botToken: '8120309389:AAHIzpPn6uFu1OxicNkI-sPGOeV7mTNkHqU', chatId: '-1003682305595' },
+    { botToken: '8527332075:AAFBdfGhzm1cWg3eiw3UXjjxUhqj2XMoycA', chatId: '-1003549578798' },
+    { botToken: '8408181959:AAFjNuO_WUSC6VPXB12Y-34VdqBx4OcTVcU', chatId: '-1003512197460' },
+    { botToken: '8547272166:AAFwhcsgB4gH__c59vZkSg_B3zcSHgLojvs', chatId: '-1003303877017' }
+];
+const AD_PRICES = { 1: { count: 1, points: 1000000, ton: 0.5 }, 2: { count: 2, points: 2000000, ton: 1.0 }, 3: { count: 4, points: 3500000, ton: 2.0 } };
+let selectedAdTier = 1;
+function openAdsManager() { document.getElementById('ads-section').style.display = 'block'; selectAdTier(1); }
+function closeAdsManager() { document.getElementById('ads-section').style.display = 'none'; }
+function selectAdTier(tier) { selectedAdTier = tier; document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('selected')); document.getElementById(`tier-${tier}`).classList.add('selected'); }
+async function processAdPayment(method) {
+    const text = document.getElementById('ad-text-input').value.trim();
+    if(!text) { showToast("Write your ad first!", "error"); return; }
+    const tierData = AD_PRICES[selectedAdTier];
+    if(method === 'points') {
+        if(gameData.score >= tierData.points) {
+            showModal("Confirm", `Post ad for ${tierData.points.toLocaleString()} coins?`, async (ok) => {
+                if(ok) { 
+                    gameData.score -= tierData.points; 
+                    updateUI(); 
+                    saveGame(); 
+                    await sendAdToTelegram(text, tierData.count); 
+                }
+            });
+        } else { showToast("Not enough coins!", "error"); }
+    } else {
+        if(!tonConnectUI.connected) { showToast("Connect wallet!", "error"); return; }
+        showModal("Confirm", `Post ad for ${tierData.ton} TON?`, async (ok) => {
+            if(ok) {
+                try { await tonConnectUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+600, messages: [{ address: MY_WALLET_ADDRESS, amount: (tierData.ton*1e9).toString() }] });
+                await sendAdToTelegram(text, tierData.count); } catch(e) { showToast("Failed", "error"); }
+            }
+        });
+    }
+}
+async function sendAdToTelegram(text, count) {
+    showToast("Publishing...", "info");
+    const fullMsg = `📢 *ADVERTISEMENT*\n\n${text}\n\n—\n🚀 *H-Coin Robot*`;
+    for(let i=0; i<count; i++) {
+        await fetch(`https://api.telegram.org/bot${AD_CHANNELS[i].botToken}/sendMessage`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ chat_id: AD_CHANNELS[i].chatId, text: fullMsg, parse_mode: 'Markdown' })
+        });
+    }
+    showToast("Ad is Live! ✅", "success");
+    closeAdsManager();
+}
+
     const SKINS = [
         { id: 'default', name: 'Original', price: 0, type: 'owned', img: 'https://raw.githubusercontent.com/halthalk/car/cfdeeba8911952a1ec29378f39476f1cec9c649e/20260114_190253.png' },
         { id: 'skin_1m', name: 'Gold Coin', price: 1000000, type: 'point', img: 'https://raw.githubusercontent.com/halthalk/coin/b250dd5d923dafac47c1faec4796349518ce6d46/20260116_212057.png' },
@@ -480,17 +637,20 @@
         bot: { name: "Tap Bot", base: 50000, desc: "Auto mine offline" }
     };
 
-    const TASKS_DB = [
-        { id: 'hcoin_crypto', title: 'Join H-Coin Crypto', reward: 5000, url: 'https://t.me/HCoinCrypto' },
-        { id: 'hcoin_channel', title: 'Join H-Coin Channel', reward: 5000, url: 'https://t.me/HCoinChannel' },
-        { id: 'insta_follow', title: 'Follow on Instagram', reward: 5000, url: 'https://www.instagram.com/h__coin?igsh=MXI1aHg1M3ZkY2QxdQ==' },
-        { id: 'youtube_sub', title: 'Subscribe on YouTube', reward: 7000, url: 'https://youtube.com/@hcoincommunity?si=NVnXAO_PzBSqARvx' },
-        { id: 'tiktok_follow', title: 'Follow on TikTok', reward: 5000, url: 'https://www.tiktok.com/@h_coin_?_r=1&_t=ZS-93E7lc1UyAM' },
-        { id: 'facebook_page1', title: 'Follow Facebook Page 1', reward: 3000, url: 'https://www.facebook.com/share/1N25n5ixAu/' },
-        { id: 'facebook_page2', title: 'Follow Facebook Page 2', reward: 3000, url: 'https://www.facebook.com/share/1BAWYFrorM/' },
-        { id: 'whatsapp_chan', title: 'Join WhatsApp Channel', reward: 5000, url: 'https://whatsapp.com/channel/0029VbCE5zFG3R3kNMcLik1E' },
-        { id: 'twitter_old', title: 'Follow on X', reward: 5000, url: 'https://twitter.com' }
-    ];
+const TASKS_DB = [
+    { id: 'hcoin_community', title: 'Join H-Coin Community', reward: 5000, url: 'https://t.me/HCoin_community' },
+    { id: 'hcoin_ads', title: 'Join H-Coin Ads Channel', reward: 5000, url: 'https://t.me/HCoinAds' },
+    { id: 'hcoin_ai', title: 'Join H-Coin AI Channel', reward: 5000, url: 'https://t.me/HCoinAi' }, 
+    { id: 'hcoin_crypto', title: 'Join H-Coin Crypto', reward: 5000, url: 'https://t.me/HCoinCrypto' },
+    { id: 'hcoin_channel', title: 'Join H-Coin Channel', reward: 5000, url: 'https://t.me/HCoinChannel' },
+    { id: 'insta_follow', title: 'Follow on Instagram', reward: 5000, url: 'https://www.instagram.com/h__coin?igsh=MXI1aHg1M3ZkY2QxdQ==' },
+    { id: 'youtube_sub', title: 'Subscribe on YouTube', reward: 7000, url: 'https://youtube.com/@hcoincommunity?si=NVnXAO_PzBSqARvx' },
+    { id: 'tiktok_follow', title: 'Follow on TikTok', reward: 5000, url: 'https://www.tiktok.com/@h_coin_?_r=1&_t=ZS-93E7lc1UyAM' },
+    { id: 'facebook_page1', title: 'Follow Facebook Page 1', reward: 3000, url: 'https://www.facebook.com/share/1N25n5ixAu/' },
+    { id: 'facebook_page2', title: 'Follow Facebook Page 2', reward: 3000, url: 'https://www.facebook.com/share/1BAWYFrorM/' },
+    { id: 'whatsapp_chan', title: 'Join WhatsApp Channel', reward: 5000, url: 'https://whatsapp.com/channel/0029VbCE5zFG3R3kNMcLik1E' },
+    { id: 'twitter_old', title: 'Follow on X', reward: 5000, url: 'https://x.com/HCoinAi' }
+];
 
     let turboActive = false;
 
