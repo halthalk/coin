@@ -219,6 +219,42 @@
             position: absolute; font-size: 50px; cursor: pointer; z-index: 99;
             animation: float 4s ease-in-out infinite;
         }
+        /* --- Lucky Chest & Premium Timer --- */
+        .lucky-chest {
+            position: absolute;
+            font-size: 50px;
+            cursor: pointer;
+            z-index: 1000;
+            filter: drop-shadow(0 0 15px var(--gold));
+            animation: chestFloat 3s ease-in-out infinite, chestSpawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+        }
+
+        @keyframes chestFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        @keyframes chestSpawn {
+            from { transform: scale(0) rotate(-180deg); opacity: 0; }
+            to { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        #premium-timer {
+            position: fixed;
+            top: calc(70px + var(--safe-top));
+            right: 20px;
+            background: linear-gradient(45deg, #9d00ff, #ff00cc);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 900;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 0 15px rgba(157, 0, 255, 0.6);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
 
         /* --- Toasts --- */
         #toast-container {
@@ -366,6 +402,8 @@
 <body class="rank-Bronze">
 
     <div id="toast-container"></div>
+    <div id="premium-timer"></div>
+
 
     <div id="custom-modal" class="custom-modal-overlay">
         <div class="custom-modal">
@@ -467,15 +505,19 @@
         
         <div class="card" style="border: 2px solid var(--purple); background: rgba(157, 0, 255, 0.1);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; color:white;">👑 H-Coin Premium</h3>
+                <h3 style="margin:0; color:white;">👑 HCoin Premium</h3>
                 <span style="font-size:24px;">💎</span>
             </div>
-            <p style="font-size:12px; color:#ccc; margin:10px 0;">
-                - 2x Multiplier per tap<br>
-                - Exclusive Purple Look<br>
-                - +5000 Max Energy Bonus<br>
-                <strong style="color: var(--blue);">PAYMENT VIA TON WALLET</strong>
-            </p>
+            <p style="font-size:12px; color:#ccc; margin:10px 0; line-height: 1.6;">
+    - 2x Multiplier per tap<br>
+    - <b>Blue Verification Badge</b> 
+    <svg style="width:14px; height:14px; vertical-align:middle; margin-left:2px;" viewBox="0 0 24 24">
+        <path fill="#0098EA" d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" />
+    </svg><br>
+    - Exclusive Purple Look<br>
+    - +5000 Max Energy Bonus<br>
+    <strong style="color: var(--blue);">PAYMENT VIA TON WALLET</strong>
+</p>
             <button class="btn-primary btn-premium" id="btn-buy-premium" onclick="buyPremium()">
                 Buy for 5 TON 💎
             </button>
@@ -629,7 +671,7 @@
     const PREMIUM_PRICE_TON = "5"; // Price in TON (Display)
     const PREMIUM_PRICE_NANO = "5000000000"; // 5 TON * 1,000,000,000
 
-    const BOT_USERNAME = "H_CoinRobot"; 
+    const BOT_USERNAME = "HCoinRobot"; 
     
     // --- TON CONNECT SETUP ---
     // UPDATED WITH YOUR MANIFEST URL
@@ -843,6 +885,8 @@ const TASKS_DB = [
         setInterval(saveGame, 2000);
         setInterval(regenEnergy, 1000);
         scheduleRocket();
+        scheduleChest();
+
 
         // مراقب تغييرات المحفظة
         tonConnectUI.onStatusChange(wallet => {
@@ -857,43 +901,49 @@ const TASKS_DB = [
         });
     }
     // --- Profile & Wallet Logic ---
-    function setupProfile() {
-        const user = tg.initDataUnsafe.user || { first_name: "Guest", username: "guest", id: "000000", language_code: "en" };
-        
-        document.getElementById('profile-name').innerText = user.first_name;
-        document.getElementById('profile-username').innerText = user.username ? '@' + user.username : 'No Username';
-        document.getElementById('profile-id').innerText = user.id;
-        document.getElementById('profile-lang').innerText = (user.language_code || 'en').toUpperCase();
-        
-        if(gameData.isPremium) {
-            const premEl = document.getElementById('profile-premium');
-            premEl.innerText = "VIP MEMBER 💎"; premEl.style.color = "#9d00ff";
-        }
+function setupProfile() {
+    const user = tg.initDataUnsafe.user || { first_name: "Guest", username: "guest", id: "000000", language_code: "en" };
+    
+    // كود علامة التوثيق الزرقاء الحقيقية (SVG)
+    const blueBadgeSVG = `<svg style="width:18px; height:18px; margin-left:5px; vertical-align:middle;" viewBox="0 0 24 24"><path fill="#0098EA" d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" /></svg>`;
 
-        if(user.photo_url) {
-            document.getElementById('profile-avatar').innerHTML = `<img src="${user.photo_url}">`;
-        } else {
-            document.getElementById('profile-avatar').innerText = user.first_name.charAt(0);
-        }
-
-        // Wallet Button State
-        const walletBtn = document.getElementById('btn-connect-wallet');
-        if (tonConnectUI.connected) {
-            const addr = tonConnectUI.account.address;
-            const shortAddr = addr.slice(0, 4) + '...' + addr.slice(-4);
-            walletBtn.innerHTML = `<span style="color:#00ff88">●</span> ${shortAddr}`;
-            walletBtn.classList.add('wallet-connected');
-            walletBtn.onclick = () => {
-                showModal("Disconnect?", "Do you want to disconnect wallet?", (ok) => {
-                    if(ok) tonConnectUI.disconnect();
-                });
-            };
-        } else {
-            walletBtn.innerHTML = `<span>💼</span> Connect TON Wallet`;
-            walletBtn.classList.remove('wallet-connected');
-            walletBtn.onclick = connectWallet;
-        }
+    // عرض الاسم مع العلامة الزرقاء فقط إذا كان المستخدم بريميوم
+    document.getElementById('profile-name').innerHTML = user.first_name + (gameData.isPremium ? blueBadgeSVG : '');
+    
+    document.getElementById('profile-username').innerText = user.username ? '@' + user.username : 'No Username';
+    document.getElementById('profile-id').innerText = user.id;
+    document.getElementById('profile-lang').innerText = (user.language_code || 'en').toUpperCase();
+    
+    if(gameData.isPremium) {
+        const premEl = document.getElementById('profile-premium');
+        premEl.innerText = "VIP MEMBER 💎"; 
+        premEl.style.color = "#9d00ff";
     }
+
+    if(user.photo_url) {
+        document.getElementById('profile-avatar').innerHTML = `<img src="${user.photo_url}">`;
+    } else {
+        document.getElementById('profile-avatar').innerText = user.first_name.charAt(0);
+    }
+
+    // إدارة حالة زر المحفظة (Wallet Button)
+    const walletBtn = document.getElementById('btn-connect-wallet');
+    if (tonConnectUI.connected) {
+        const addr = tonConnectUI.account.address;
+        const shortAddr = addr.slice(0, 4) + '...' + addr.slice(-4);
+        walletBtn.innerHTML = `<span style="color:#00ff88">●</span> ${shortAddr}`;
+        walletBtn.classList.add('wallet-connected');
+        walletBtn.onclick = () => {
+            showModal("Disconnect?", "Do you want to disconnect wallet?", (ok) => {
+                if(ok) tonConnectUI.disconnect();
+            });
+        };
+    } else {
+        walletBtn.innerHTML = `<span>💼</span> Connect TON Wallet`;
+        walletBtn.classList.remove('wallet-connected');
+        walletBtn.onclick = connectWallet;
+    }
+}
 
     async function connectWallet() {
         try {
@@ -1232,34 +1282,75 @@ const TASKS_DB = [
         }
     }
 
-    function renderLeaderboard() {
-        const list = document.getElementById('leaderboard-list');
-        let users = [
-            { name: "EVAR", score: 100000000 },
-            { name: "i_Crypto", score: 98000000 },
-            { name: "NotKing", score: 85000000 },
-            { name: "You", score: gameData.score, self: true },
-            { name: "Black_Demon", score: Math.max(80000000, gameData.score - 5000) }
-        ];
-        
-        users.sort((a,b) => b.score - a.score);
+function renderLeaderboard() {
+    const list = document.getElementById('leaderboard-list');
+    
+    // 1. حساب "خسارة الترتيب" بناءً على الوقت (وهمي)
+    // بنفترض إن كل ساعة مرت من غير لعب، المستخدم بيتأخر 50 مركز
+    const now = Date.now();
+    const lastActive = gameData.lastSave || now; // تأكد من وجود timestamp عند الحفظ
+    const hoursAway = Math.floor((now - lastActive) / (1000 * 60 * 60));
+    const rankPenalty = hoursAway * 50; 
 
-        list.innerHTML = '';
-        users.forEach((u, i) => {
-            const div = document.createElement('div');
-            div.className = 'leaderboard-row';
-            if(u.self) div.style.background = 'rgba(255, 215, 0, 0.1)';
-            div.innerHTML = `
+    // 2. معادلة المركز الأساسية
+    let upgradeBonus = (gameData.upgrades.multitap + gameData.upgrades.energy + gameData.upgrades.speed) * 500;
+    let effectiveScore = gameData.score + upgradeBonus;
+    let baseRank = 185432; 
+    let rankImprovement = Math.floor(Math.sqrt(effectiveScore) * 15);
+    
+    // المركز النهائي = المركز الأساسي - التحسن + العقوبة
+    let currentRank = Math.max(124, (baseRank - rankImprovement) + rankPenalty);
+
+    let randomMiners = Math.floor(Math.random() * (108000 - 102000 + 1)) + 102000;
+
+    const goldBadge = `<svg style="width:14px; height:14px; margin-left:4px; vertical-align:middle;" viewBox="0 0 24 24"><path fill="#ffd700" d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" /></svg>`;
+    const blueBadge = `<svg style="width:14px; height:14px; margin-left:4px; vertical-align:middle;" viewBox="0 0 24 24"><path fill="#0098EA" d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" /></svg>`;
+
+    const topWhales = [
+        { name: "evara", score: 2500000000, img: "E", color: "#ffd700", badge: goldBadge },
+        { name: "Black demon", score: 1850000000, img: "B", color: "#ff3333", badge: blueBadge },
+        { name: "TON_Whale", score: 950000000, img: "T", color: "#0098EA", badge: blueBadge },
+        { name: "Crypto_Shark", score: 520000000, img: "S", color: "#00ff88", badge: blueBadge },
+        { name: "Marci", score: 310000000, img: "A", color: "#ffffff", badge: blueBadge }
+    ];
+
+    let html = '';
+
+    topWhales.forEach((u, i) => {
+        html += `
+            <div class="leaderboard-row">
                 <div class="rank-num rank-${i+1}">${i+1}</div>
                 <div class="lb-user">
-                    <div class="lb-avatar">${u.name.charAt(0)}</div>
-                    <div>${u.name} ${u.self ? '(You)' : ''}</div>
+                    <div class="lb-avatar" style="border: 1px solid ${u.color}; color:${u.color}">${u.img}</div>
+                    <div style="font-weight:bold; display:flex; align-items:center;">${u.name} ${u.badge}</div>
                 </div>
                 <div class="lb-score">${u.score.toLocaleString()}</div>
-            `;
-            list.appendChild(div);
-        });
-    }
+            </div>`;
+    });
+
+    html += `<div style="text-align:center; margin: 15px 0; color:#444; font-size:9px;">••• CONNECTED TO H-NETWORK •••</div>`;
+
+    // 3. جزء المستخدم مع حل مشكلة التداخل (Padding & Margin)
+    const userName = tg.initDataUnsafe.user?.first_name || 'Player';
+    const userBadge = gameData.isPremium ? blueBadge : ''; 
+    
+    html += `
+        <div class="leaderboard-row" style="background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, transparent 100%); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; margin-top: 10px;">
+            <div class="rank-num" style="color:var(--gold); min-width: 80px; text-align: left; padding-left: 10px;">#${currentRank.toLocaleString()}</div>
+            <div class="lb-user" style="margin-left: 15px;"> <div class="lb-avatar" style="background:var(--gold); color:black; font-weight:bold;">YOU</div>
+                <div style="font-weight:bold; display:flex; align-items:center;">${userName} ${userBadge}</div>
+            </div>
+            <div class="lb-score" style="color:var(--gold)">${Math.floor(gameData.score).toLocaleString()}</div>
+        </div>`;
+
+    html += `
+        <div style="text-align:center; padding:15px; color:#666; font-size:11px;">
+            <span style="color:#00ff88">●</span> <b>${randomMiners.toLocaleString()}</b> Miners Online
+            ${hoursAway > 0 ? `<div style="color:#ff4444; font-size:9px; margin-top:5px;">⚠️ Rank dropped by ${rankPenalty} due to inactivity</div>` : ''}
+        </div>`;
+
+    list.innerHTML = html;
+}
 
     function regenEnergy() {
         if(gameData.energy < gameData.maxEnergy) {
@@ -1340,11 +1431,122 @@ const TASKS_DB = [
         if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     }
 
-    function applySkin() {
+        function applySkin() {
         const skin = SKINS.find(s => s.id === gameData.activeSkin);
         if(skin) {
             document.querySelector('#coin-visual img').src = skin.img;
         }
+    }
+
+    // --- LUCKY CHEST & TRIAL PREMIUM SYSTEM (NEW ADDITION) ---
+    function spawnLuckyChest() {
+        // لا يظهر الصندوق إلا في صفحة التعدين
+        if (document.getElementById('mine-section').style.display === 'none') return;
+
+        const chest = document.createElement('div');
+        chest.className = 'lucky-chest';
+        chest.innerHTML = '🎁';
+        
+        // تحديد مكان عشوائي للصندوق
+        chest.style.left = Math.random() * 70 + 15 + '%';
+        chest.style.top = Math.random() * 50 + 20 + '%';
+
+        chest.onclick = () => {
+            openChest(chest);
+        };
+
+        document.body.appendChild(chest);
+
+        // الصندوق يختفي تلقائياً بعد 8 ثواني لو المستخدم مالحقش يفتحه
+        setTimeout(() => { 
+            if(chest.parentNode) chest.remove(); 
+        }, 8000);
+    }
+
+    function openChest(chestElement) {
+        const rewards = [
+            { name: "Mega Coins", val: 50000, type: 'coins', icon: '💰' },
+            { name: "Mega Coins", val: 50000, type: 'coins', icon: '💰' },
+            { name: "free Coins", val: 25000, type: 'coins', icon: '💰' },
+            { name: "free Coins", val: 25000, type: 'coins', icon: '💰' },
+            { name: "free Coins", val: 5000, type: 'coins', icon: '💰' },
+            { name: "Energy Refill", val: 1000, type: 'energy', icon: '⚡' },
+            { name: "Energy Refill", val: 1000, type: 'energy', icon: '⚡' },
+            { name: "Jackpot", val: 250000, type: 'coins', icon: '🔥' },
+            { name: "VIP Trial (15m)", val: 15, type: 'premium_temp', icon: '💎' },
+            { name: "VIP Trial (10m)", val: 10, type: 'premium_temp', icon: '💎' },
+            { name: "VIP Trial (10m)", val: 10, type: 'premium_temp', icon: '💎' }
+        ];
+
+        // اختيار جائزة عشوائية
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+
+        if (reward.type === 'coins') {
+            gameData.score += reward.val;
+        } else if (reward.type === 'energy') {
+            gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + reward.val);
+        } else if (reward.type === 'premium_temp') {
+            activateTemporaryPremium(reward.val);
+        }
+
+        showToast(`LUCKY CHEST: ${reward.icon} ${reward.name}`, "success");
+        
+        // تأثير بسيط عند الفتح قبل المسح
+        chestElement.innerHTML = '✨';
+        chestElement.style.pointerEvents = 'none';
+        setTimeout(() => chestElement.remove(), 500);
+        
+        updateUI();
+        saveGame();
+    }
+
+    function activateTemporaryPremium(minutes) {
+        // لو المستخدم بريميوم أصلاً، نديله هدية بديلة
+        if (gameData.isPremium) {
+            gameData.score += 100000;
+            showToast("Already VIP! Gift: +100k Coins 🎁", "success");
+            return;
+        }
+
+        // تفعيل البريميوم ومميزاته
+        gameData.isPremium = true;
+        checkPremiumVisuals();
+        setupProfile();
+
+        const timerEl = document.getElementById('premium-timer');
+        if (timerEl) timerEl.style.display = 'block';
+
+        let timeLeft = minutes * 60;
+        const countdown = setInterval(() => {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            if (timerEl) timerEl.innerText = `💎 TRIAL: ${m}:${s < 10 ? '0'+s : s}`;
+            timeLeft--;
+
+            // إنهاء الفترة التجريبية
+            if (timeLeft < 0 || gameData.isPremium === false) {
+                clearInterval(countdown);
+                if (timerEl) timerEl.style.display = 'none';
+                
+                // لو انتهى الوقت ومازال بريميوم (يعني مش هو اللي اشتراه في النص)
+                if (timeLeft < 0) {
+                    gameData.isPremium = false;
+                    checkPremiumVisuals();
+                    setupProfile();
+                    showToast("Trial ended! Get VIP in Boosts 💎", "info");
+                    saveGame();
+                }
+            }
+        }, 1000);
+    }
+
+    function scheduleChest() {
+        // يظهر الصندوق كل فترة بين دقيقة و 3 دقائق
+        let nextSpawn = Math.random() * (180000 - 60000) + 60000;
+        setTimeout(() => {
+            spawnLuckyChest();
+            scheduleChest();
+        }, nextSpawn);
     }
 
     function buySkin(id) {
