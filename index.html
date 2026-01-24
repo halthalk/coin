@@ -349,15 +349,22 @@ body.rank-Mythic {
 .tier-price { text-align: right; }
 .price-coin { color: var(--gold); font-weight: bold; font-size: 13px; display: block; }
 .price-ton { color: var(--blue); font-weight: bold; font-size: 13px; display: block; }
-/* تصميم مطور لأزرار دفع الإعلانات */
 .ads-footer-btns {
-    position: sticky;
-    bottom: 0;
-    background: linear-gradient(to top, var(--bg) 80%, transparent);
-    padding: 20px 0;
+    position: fixed;
+    bottom: 85px; /* المسافة دي عشان يظهر فوق الـ Nav Bar الأساسي ومايغطيش عليه */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 480px;
+    background: rgba(28, 28, 30, 0.95);
+    backdrop-filter: blur(15px);
+    padding: 12px;
     display: flex;
-    gap: 12px;
-    z-index: 10;
+    gap: 10px;
+    z-index: 1100;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.4);
 }
 
 .btn-pay {
@@ -717,12 +724,28 @@ function selectAdTier(tier) { selectedAdTier = tier; document.querySelectorAll('
 async function processAdPayment(method) {
     const text = document.getElementById('ad-text-input').value.trim();
     if(!text) { showToast("Write your ad first!", "error"); return; }
+    
+    // --- نظام الـ Cooldown (ساعة واحدة) ---
+    const now = Date.now();
+    const cooldownTime = 60 * 60 * 1000; 
+    const lastPost = gameData.lastAdPost || 0;
+    const timeLeft = lastPost + cooldownTime - now;
+
+    if (timeLeft > 0) {
+        const minutesLeft = Math.ceil(timeLeft / (60 * 1000));
+        showToast(`Wait ${minutesLeft} minutes before posting again! ⏳`, "error");
+        return;
+    }
+    // ------------------------------------
+
     const tierData = AD_PRICES[selectedAdTier];
+
     if(method === 'points') {
         if(gameData.score >= tierData.points) {
-            showModal("Confirm", `Post ad for ${tierData.points.toLocaleString()} coins?`, async (ok) => {
+            showModal("Confirm Payment", `Post ad for ${tierData.points.toLocaleString()} coins?`, async (ok) => {
                 if(ok) { 
-                    gameData.score -= tierData.points; 
+                    gameData.score -= tierData.points;
+                    gameData.lastAdPost = Date.now(); // حفظ وقت النشر
                     updateUI(); 
                     saveGame(); 
                     await sendAdToTelegram(text, tierData.count); 
@@ -730,11 +753,30 @@ async function processAdPayment(method) {
             });
         } else { showToast("Not enough coins!", "error"); }
     } else {
-        if(!tonConnectUI.connected) { showToast("Connect wallet!", "error"); return; }
-        showModal("Confirm", `Post ad for ${tierData.ton} TON?`, async (ok) => {
+        if(!tonConnectUI.connected) { showToast("Connect wallet first!", "error"); return; }
+        
+        showModal("Confirm TON Payment", `Post ad for ${tierData.ton} TON?`, async (ok) => {
             if(ok) {
-                try { await tonConnectUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+600, messages: [{ address: MY_WALLET_ADDRESS, amount: (tierData.ton*1e9).toString() }] });
-                await sendAdToTelegram(text, tierData.count); } catch(e) { showToast("Failed", "error"); }
+                try {
+                    showToast("Waiting for transaction...", "info");
+                    const result = await tonConnectUI.sendTransaction({
+                        validUntil: Math.floor(Date.now() / 1000) + 600,
+                        messages: [{
+                            address: MY_WALLET_ADDRESS,
+                            amount: (tierData.ton * 1e9).toString()
+                        }]
+                    });
+
+                    if (result) {
+                        gameData.lastAdPost = Date.now(); // حفظ وقت النشر بعد نجاح المعاملة
+                        saveGame();
+                        showToast("Payment Verified! Publishing...", "success");
+                        await sendAdToTelegram(text, tierData.count);
+                    }
+                } catch(e) {
+                    console.error(e);
+                    showToast("Payment failed or rejected", "error");
+                }
             }
         });
     }
@@ -1190,7 +1232,7 @@ function setupProfile() {
 
         if(task.id === 'share_story') {
              const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
-             const inviteLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+             const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
              const text = `🔥 Join me on H-Coin Pro! Mining is live.\n${inviteLink}`;
              const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(text)}`;
              tg.openTelegramLink(url);
@@ -1221,7 +1263,7 @@ function setupProfile() {
 
     function inviteFriend() {
         const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
-        const inviteLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+        const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
         const shareText = `🚀 Join me on H-Coin Pro! Mine coins and compete.\n\n👇 Start here:\n${inviteLink}`;
         
         const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
@@ -1500,9 +1542,9 @@ function renderLeaderboard() {
             { name: "Energy Refill", val: 1000, type: 'energy', icon: '⚡' },
             { name: "Energy Refill", val: 1000, type: 'energy', icon: '⚡' },
             { name: "Jackpot", val: 250000, type: 'coins', icon: '🔥' },
-            { name: "VIP Trial (1m)", val: 1, type: 'premium_temp', icon: '💎' },
-            { name: "VIP Trial (3m)", val: 3, type: 'premium_temp', icon: '💎' },
-            { name: "VIP Trial (5m)", val: 5, type: 'premium_temp', icon: '💎' }
+            { name: "VIP Trial (15m)", val: 15, type: 'premium_temp', icon: '💎' },
+            { name: "VIP Trial (10m)", val: 10, type: 'premium_temp', icon: '💎' },
+            { name: "VIP Trial (10m)", val: 10, type: 'premium_temp', icon: '💎' }
         ];
 
         // اختيار جائزة عشوائية
