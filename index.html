@@ -1233,7 +1233,7 @@ function setupProfile() {
         if(task.id === 'share_story') {
              const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
              const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
-             const text = `🔥 Join me on H-Coin Pro! Mining is live.\n${inviteLink}`;
+             const text = `🔥 Join me on H-Coin Pro! Mining is live $HCOIN.\n${inviteLink}`;
              const url = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(text)}`;
              tg.openTelegramLink(url);
         } else {
@@ -1264,7 +1264,7 @@ function setupProfile() {
     function inviteFriend() {
         const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "000";
         const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
-        const shareText = `🚀 Join me on H-Coin Pro! Mine coins and compete.\n\n👇 Start here:\n${inviteLink}`;
+        const shareText = `🚀 Join me on H-Coin Pro! Mine $HCOIN and compete.\n\n👇 Start here:\n${inviteLink}`;
         
         const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
         tg.openTelegramLink(fullUrl);
