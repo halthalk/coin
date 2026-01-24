@@ -43,10 +43,35 @@
         body.rank-GrandMaster { background: radial-gradient(circle at center, #520000 0%, #000 100%); }
         body.rank-Elite { background: radial-gradient(circle at center, #003812 0%, #000 100%); }
         body.rank-Legendary { background: radial-gradient(circle at center, #5c2600 0%, #000 100%); }
-        body.rank-Mythic { background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); border: 2px solid cyan; }
         
-        body.is-premium { border: 2px solid var(--purple); }
-        body.turbo-active { background: radial-gradient(circle at center, #551a00 0%, #000 100%) !important; }
+body.is-premium { 
+    background: radial-gradient(circle at center, #551a00 0%, #000 100%) !important; 
+    border: none !important; 
+}
+body.turbo-active { 
+    background: radial-gradient(circle at center, #7a2800 0%, #000 100%) !important; 
+    border: none !important;
+}
+body.rank-Mythic {
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%) !important;
+    overflow: hidden;
+    position: relative;
+}
+.shooting-star {
+    position: absolute;
+    top: -50px;
+    width: 2px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.8));
+    transform: rotate(135deg);
+    z-index: 1;
+    pointer-events: none;
+}
+@keyframes shoot {
+    0% { transform: translate(0, 0) rotate(135deg); opacity: 0; }
+    15% { opacity: 1; }
+    100% { transform: translate(120vw, 120vh) rotate(135deg); opacity: 0; }
+}
 
         /* --- Components --- */
         .btn-primary {
@@ -1274,11 +1299,13 @@ function setupProfile() {
         document.getElementById('league-display').innerText = rankText;
         
         document.body.className = ''; 
-        if(!turboActive) {
-            document.body.classList.add(`rank-${currentRank.name.replace(/\s+/g, '')}`);
-            if(gameData.isPremium) document.body.classList.add('is-premium');
-        } else {
+        if (turboActive) {
             document.body.classList.add('turbo-active');
+        } else {
+            document.body.classList.add(`rank-${currentRank.name.replace(/\s+/g, '')}`);
+            if (gameData.isPremium) {
+                document.body.classList.add('is-premium');
+            }
         }
     }
 
@@ -1473,9 +1500,9 @@ function renderLeaderboard() {
             { name: "Energy Refill", val: 1000, type: 'energy', icon: '⚡' },
             { name: "Energy Refill", val: 1000, type: 'energy', icon: '⚡' },
             { name: "Jackpot", val: 250000, type: 'coins', icon: '🔥' },
-            { name: "VIP Trial (15m)", val: 15, type: 'premium_temp', icon: '💎' },
-            { name: "VIP Trial (10m)", val: 10, type: 'premium_temp', icon: '💎' },
-            { name: "VIP Trial (10m)", val: 10, type: 'premium_temp', icon: '💎' }
+            { name: "VIP Trial (1m)", val: 1, type: 'premium_temp', icon: '💎' },
+            { name: "VIP Trial (3m)", val: 3, type: 'premium_temp', icon: '💎' },
+            { name: "VIP Trial (5m)", val: 5, type: 'premium_temp', icon: '💎' }
         ];
 
         // اختيار جائزة عشوائية
@@ -1588,6 +1615,25 @@ function renderLeaderboard() {
             }
         }
     }
+    function createMythicStars() {
+    if (!document.body.classList.contains('rank-Mythic')) return;
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.top = Math.random() * -20 + 'vh';
+    const rand = Math.random();
+    let color = "#ffffff"; 
+    if (rand > 0.7) color = "#ffea00"; 
+    if (rand > 0.95) color = "#ff3333"; 
+    star.style.background = `linear-gradient(to bottom, transparent, ${color})`;
+    star.style.boxShadow = `0 0 15px ${color}`;
+    const duration = Math.random() * 1.5 + 1; 
+    star.style.animation = `shoot ${duration}s linear forwards`;
+    document.body.appendChild(star);
+    setTimeout(() => { star.remove(); }, duration * 1000);
+}
+setInterval(createMythicStars, 400);
+
     window.onload = init;
 </script>
 
