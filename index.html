@@ -1376,24 +1376,48 @@ function renderLeaderboard() {
     const blueBadge = `<svg style="width:14px; height:14px; margin-left:4px; vertical-align:middle;" viewBox="0 0 24 24"><path fill="#0098EA" d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" /></svg>`;
 
     const topWhales = [
-        { name: "evar", score: 250000000, img: "E", color: "#ffd700", badge: goldBadge },
-        { name: "Lego", score: 185000000, img: "L", color: "#ff3333", badge: blueBadge },
-        { name: "Black Demon", score: 95000000, img: "B", color: "#0098EA", badge: blueBadge },
-        { name: "Crypto_Shark", score: 52000000, img: "C", color: "#00ff88", badge: blueBadge },
-        { name: "mr coin", score: 31000000, img: "M", color: "#ffffff", badge: blueBadge }
+        { 
+            name: "Bebo💕", 
+            score: "1B", 
+            img: "https://raw.githubusercontent.com/halthalk/Coin_beta/main/IMG_20260426_084042_211.jpg", 
+            isImage: true, 
+            badge: goldBadge 
+        },
+        { name: "- 𝗦𝗽𝗘𝗲𝗗 -", score: "250M", img: "https://raw.githubusercontent.com/halthalk/Coin_beta/main/IMG_20260426_225546_083.jpg", 
+            isImage: true, 
+            badge: goldBadge 
+        },
+        { name: "- SaNaD -", score: "185M", img: "https://raw.githubusercontent.com/halthalk/Coin_beta/main/IMG_20260426_102827_787.jpg", 
+            isImage: true, 
+            badge: blueBadge 
+        },
+        { name: "𓏺 𝙍𝙀𝙏𝘼⤾", score: "95M", img: "https://raw.githubusercontent.com/halthalk/Coin_beta/main/IMG_20260426_103015_249.jpg", 
+            isImage: true, 
+            badge: blueBadge 
+        },
+        { name: "𝘾𝙝𝙧𝙞𝙨𝙩𝙞𝙣𝙖", score: "52M", img: "https://raw.githubusercontent.com/halthalk/Coin_beta/main/IMG_20260426_230516_130.jpg", 
+            isImage: true, 
+            badge: goldBadge 
+        },
     ];
 
     let html = '';
 
     topWhales.forEach((u, i) => {
+        const avatarContent = u.isImage 
+            ? `<img src="${u.img}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
+            : u.img;
+            
         html += `
             <div class="leaderboard-row">
                 <div class="rank-num rank-${i+1}">${i+1}</div>
                 <div class="lb-user">
-                    <div class="lb-avatar" style="border: 1px solid ${u.color}; color:${u.color}">${u.img}</div>
+                    <div class="lb-avatar" style="border: 1px solid ${u.color || 'var(--gold)'}; overflow:hidden;">
+                        ${avatarContent}
+                    </div>
                     <div style="font-weight:bold; display:flex; align-items:center;">${u.name} ${u.badge}</div>
                 </div>
-                <div class="lb-score">${u.score.toLocaleString()}</div>
+                <div class="lb-score">${typeof u.score === 'string' ? u.score : u.score.toLocaleString()}</div>
             </div>`;
     });
 
@@ -1686,4 +1710,3 @@ setInterval(createMythicStars, 400);
 
 </body>
 </html>
-
